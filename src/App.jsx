@@ -744,15 +744,20 @@ function App() {
                 <div className="hero-card-badge">Seats Filling Fast</div>
                 <h2 className="hero-card-title">Available Courses</h2>
                 {courseCards.map((course) => (
-                  <div className="course-pill" key={course.key}>
+                  <button
+                    className="course-pill course-pill-button"
+                    key={course.key}
+                    type="button"
+                    onClick={() => scrollToForm(course.key)}
+                  >
                     <div>
                       <div className="pill-name">{course.title}</div>
                       <div className="pill-meta">
                         {course.durationLabel === "Months" ? `${course.duration} Months` : "30 / 40 wpm"}
                       </div>
                     </div>
-                    <div className="pill-price">Ã¢â€šÂ¹{course.fee.toLocaleString("en-IN")}</div>
-                  </div>
+                    <div className="pill-price">Rs. {course.fee.toLocaleString("en-IN")}</div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -784,7 +789,7 @@ function App() {
                   </div>
                   <div className="divider-v" />
                   <div className="meta-item">
-                    <div className="meta-val">Ã¢â€šÂ¹{course.fee.toLocaleString("en-IN")}</div>
+                    <div className="meta-val">Rs. {course.fee.toLocaleString("en-IN")}</div>
                     <div className="meta-lbl">Fees</div>
                   </div>
                 </div>
@@ -886,7 +891,7 @@ function App() {
                     <span className="calc-checkbox">{selected ? "x" : ""}</span>
                     <div className="calc-course-name">{course.label}</div>
                     <div className="calc-course-dur">{course.meta}</div>
-                    <div className="calc-course-fee">Ã¢â€šÂ¹{course.fee.toLocaleString("en-IN")}</div>
+                    <div className="calc-course-fee">Rs. {course.fee.toLocaleString("en-IN")}</div>
                   </button>
                 );
               })}
@@ -912,7 +917,7 @@ function App() {
             <div className="calc-result">
               <div>
                 <div className="calc-result-label">Total Estimated Fee</div>
-                <div className="calc-result-total">Ã¢â€šÂ¹{calculatorTotal.toLocaleString("en-IN")}</div>
+                <div className="calc-result-total">Rs. {calculatorTotal.toLocaleString("en-IN")}</div>
                 <div className="calc-result-label subtle">
                   {selectedCalculatorLabels || "No course selected"}
                   {calcSelections.typing && calcTypingOption ? ` - ${calcTypingOption}` : ""}
@@ -927,7 +932,7 @@ function App() {
                     return;
                   }
                   showToast(
-                    `UPI payment for Ã¢â€šÂ¹${calculatorTotal.toLocaleString("en-IN")} will use ${siteSettings.upiId}.`,
+                    `UPI payment for Rs. ${calculatorTotal.toLocaleString("en-IN")} will use ${siteSettings.upiId}.`,
                   );
                 }}
               >
@@ -1115,7 +1120,7 @@ function App() {
                       onChange={() => toggleFormArrayValue("courses", course.key)}
                       type="checkbox"
                     />
-                    {course.title} (Ã¢â€šÂ¹{course.fee.toLocaleString("en-IN")})
+                    {course.title} (Rs. {course.fee.toLocaleString("en-IN")})
                   </label>
                 ))}
               </div>
