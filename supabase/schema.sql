@@ -33,6 +33,14 @@ create table if not exists public.site_settings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.admin_users (
+  id bigint generated always as identity primary key,
+  username text unique not null,
+  password_hash text not null,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
 insert into public.site_settings (setting_key, setting_value)
 values
   ('institute_name', 'Priyadarshini Computer & Typewriting Institute, Shirol'),
@@ -43,9 +51,14 @@ values
   ('upi_id', '')
 on conflict (setting_key) do nothing;
 
+insert into public.admin_users (username, password_hash, is_active)
+values ('admin', '41e5653fc7aeb894026d6bb7b2db7f65902b454945fa8fd65a6327047b5277fb', true)
+on conflict (username) do nothing;
+
 alter table public.student_registrations enable row level security;
 alter table public.contact_messages enable row level security;
 alter table public.site_settings enable row level security;
+alter table public.admin_users enable row level security;
 
 drop policy if exists "deny_anonymous_reads" on public.student_registrations;
 create policy "deny_anonymous_reads"
@@ -67,3 +80,10 @@ on public.site_settings
 for select
 to anon
 using (true);
+
+drop policy if exists "deny_anonymous_admin_reads" on public.admin_users;
+create policy "deny_anonymous_admin_reads"
+on public.admin_users
+for select
+to anon
+using (false);

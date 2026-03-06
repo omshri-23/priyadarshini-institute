@@ -1255,6 +1255,42 @@ select:focus,
   font-size: 0.85rem;
 }
 
+.admin-help {
+  margin-top: 1rem;
+  color: rgba(15, 25, 35, 0.58);
+  font-size: 0.82rem;
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap .admin-input {
+  margin-bottom: 0;
+  padding-right: 52px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 25, 35, 0.06);
+  color: #465667;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .admin-dashboard {
   background: #f0f4f8;
 }

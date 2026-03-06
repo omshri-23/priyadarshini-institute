@@ -166,10 +166,12 @@ function App() {
   const [calcSelections, setCalcSelections] = useState({});
   const [calcTypingOption, setCalcTypingOption] = useState("");
   const [admissionForm, setAdmissionForm] = useState(initialAdmissionForm);
-  const [isSubmittingAdmission, setIsSubmittingAdmission] = useState(false);  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
+  const [isSubmittingAdmission, setIsSubmittingAdmission] = useState(false);
+  const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [adminView, setAdminView] = useState("enquiries");
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState({ username: "", password: "" });
   const [siteSettings, setSiteSettings] = useState(siteSettingsDefaults);
   const [settingsForm, setSettingsForm] = useState(siteSettingsDefaults);
@@ -1273,7 +1275,7 @@ function App() {
             {!adminLoggedIn ? (
               <div className="admin-login-box">
                 <h2>Admin Login</h2>
-                <p>Use your configured admin credentials to access real registration data.</p>
+                <p>Use your admin username and password to access enquiries, messages, and settings.</p>
                 <form onSubmit={adminLogin}>
                   <input
                     className="admin-input"
@@ -1283,20 +1285,45 @@ function App() {
                       setAdminCredentials((current) => ({ ...current, username: event.target.value }))
                     }
                   />
-                  <input
-                    className="admin-input"
-                    placeholder="Password"
-                    type="password"
-                    value={adminCredentials.password}
-                    onChange={(event) =>
-                      setAdminCredentials((current) => ({ ...current, password: event.target.value }))
-                    }
-                  />
+                  <div className="password-wrap">
+                    <input
+                      className="admin-input"
+                      placeholder="Password"
+                      type={showAdminPassword ? "text" : "password"}
+                      value={adminCredentials.password}
+                      onChange={(event) =>
+                        setAdminCredentials((current) => ({ ...current, password: event.target.value }))
+                      }
+                    />
+                    <button
+                      className="password-toggle"
+                      type="button"
+                      aria-label={showAdminPassword ? "Hide password" : "Show password"}
+                      onClick={() => setShowAdminPassword((current) => !current)}
+                    >
+                      {showAdminPassword ? (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M2.3 1 1 2.3l4.05 4.05A12.8 12.8 0 0 0 1 12c1.73 4.03 6.1 7 11 7 2.09 0 4.08-.54 5.82-1.49L21.7 21l1.3-1.3L2.3 1Zm9.7 15a4 4 0 0 1-4-4c0-.63.15-1.23.41-1.75l5.34 5.34c-.52.26-1.12.41-1.75.41Zm3.7-1.47-1.67-1.67c.18-.26.28-.58.28-.93a2 2 0 0 0-2-2c-.35 0-.67.1-.93.28L9.7 8.54A3.94 3.94 0 0 1 12 8c2.21 0 4 1.79 4 4 0 .82-.24 1.58-.65 2.23ZM12 5c4.9 0 9.27 2.97 11 7a12.7 12.7 0 0 1-3.77 4.81l-1.46-1.46A10.7 10.7 0 0 0 20.82 12C19.34 9.05 15.95 7 12 7c-1.15 0-2.26.18-3.28.52l-1.6-1.6A12.9 12.9 0 0 1 12 5Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M12 5c4.9 0 9.27 2.97 11 7-1.73 4.03-6.1 7-11 7S2.73 16.03 1 12c1.73-4.03 6.1-7 11-7Zm0 11a4 4 0 1 0 0-8a4 4 0 0 0 0 8Zm0-2a2 2 0 1 1 0-4a2 2 0 0 1 0 4Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   <button className="admin-login-btn" type="submit">
                     {adminState.loading ? "Loading..." : "Login to Dashboard"}
                   </button>
                 </form>
                 {adminState.error ? <p className="admin-error">{adminState.error}</p> : null}
+                <p className="admin-help">After updating Supabase schema, use: `admin` / `admin12345`</p>
               </div>
             ) : (
               <div className="admin-dashboard">

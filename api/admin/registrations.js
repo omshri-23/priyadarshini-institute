@@ -1,8 +1,8 @@
-import { isAuthorized, json, supabaseFetch } from "../_lib/supabase.js";
+import { authorizeAdmin, json, supabaseFetch } from "../_lib/supabase.js";
 
 export default async function handler(request, response) {
-  if (!isAuthorized(request)) {
-    return json(response, 401, { error: "Invalid admin credentials." });
+  if (!(await authorizeAdmin(request, response))) {
+    return;
   }
 
   try {
