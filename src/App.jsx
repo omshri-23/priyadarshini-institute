@@ -73,19 +73,22 @@ const typingChoices = [
   "Marathi 40 wpm",
 ];
 
-const galleryItems = [
-  ["classroom", "Computer Lab", "lab"],
-  ["classroom", "Lecture Hall", "hall"],
-  ["classroom", "Typing Lab", "typing"],
-  ["students", "Students at Work", "students"],
-  ["students", "Group Study", "group"],
-  ["students", "MS-CIT Class", "class"],
-  ["events", "Annual Day 2025", "event"],
-  ["events", "Prize Distribution", "prize"],
-  ["events", "Batch Photo", "photo"],
-  ["certificates", "Certificate Ceremony", "cert"],
-  ["certificates", "Top Performers", "top"],
-  ["certificates", "Tally Batch 2025", "tally"],
+const processSteps = [
+  [
+    "01",
+    "Choose Your Course",
+    "Pick MS-CIT, Tally Prime, or typewriting based on your exam, office, or accounting goal.",
+  ],
+  [
+    "02",
+    "Submit Enquiry",
+    "Fill the admission form with your details so the institute can contact you and confirm the batch.",
+  ],
+  [
+    "03",
+    "Confirm Payment",
+    "Use the fee calculator and UPI payment block, then share the payment screenshot on WhatsApp for confirmation.",
+  ],
 ];
 
 const faqs = [
@@ -129,14 +132,17 @@ const siteSettingsDefaults = {
   location: "Near Tahsildar Office main road - Shirol, Kolhapur",
   whatsappNumber: "917558628660",
   contactPhone: "+91 755 862 8660",
-  upiId: "your-upi-id@bank",
+  upiId: "",
+  upiPayeeName: "Priyadarshini Institute",
+  upiQrImageUrl: "",
+  upiPaymentNote: "Admission fee payment",
 };
 
 const navItems = [
   ["home", "Home"],
   ["courses", "Courses"],
   ["fee-calc", "Fee Calc"],
-  ["gallery", "Gallery"],
+  ["process", "Process"],
   ["faq", "FAQ"],
   ["contact", "Contact"],
 ];
@@ -162,7 +168,6 @@ function App() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [toast, setToast] = useState("");
   const [activeFaq, setActiveFaq] = useState(null);
-  const [galleryFilter, setGalleryFilter] = useState("all");
   const [calcSelections, setCalcSelections] = useState({});
   const [calcTypingOption, setCalcTypingOption] = useState("");
   const [admissionForm, setAdmissionForm] = useState(initialAdmissionForm);
@@ -175,6 +180,11 @@ function App() {
   const [adminCredentials, setAdminCredentials] = useState({ username: "", password: "" });
   const [siteSettings, setSiteSettings] = useState(siteSettingsDefaults);
   const [settingsForm, setSettingsForm] = useState(siteSettingsDefaults);
+  const [adminAccessForm, setAdminAccessForm] = useState({
+    username: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [contactForm, setContactForm] = useState({ name: "", phone: "", message: "" });
   const [publicHighlights, setPublicHighlights] = useState({ totalAdmissions: 0, rows: [] });
   const [adminState, setAdminState] = useState({
@@ -182,12 +192,18 @@ function App() {
     loading: false,
     error: "",
     query: "",
+    page: 1,
+    total: 0,
+    stats: { total: 0, pending: 0, paid: 0 },
   });
   const [messageState, setMessageState] = useState({
     rows: [],
     loading: false,
     error: "",
     query: "",
+    page: 1,
+    total: 0,
+    stats: { total: 0, fresh: 0, resolved: 0 },
   });
 
   useEffect(() => {
@@ -239,6 +255,9 @@ function App() {
           whatsappNumber: payload.settings.whatsapp_number || siteSettingsDefaults.whatsappNumber,
           contactPhone: payload.settings.contact_phone || siteSettingsDefaults.contactPhone,
           upiId: payload.settings.upi_id || "",
+          upiPayeeName: payload.settings.upi_payee_name || siteSettingsDefaults.upiPayeeName,
+          upiQrImageUrl: payload.settings.upi_qr_image_url || "",
+          upiPaymentNote: payload.settings.upi_payment_note || siteSettingsDefaults.upiPaymentNote,
         };
 
         setSiteSettings(nextSettings);
@@ -280,60 +299,50 @@ function App() {
       .join(" + ");
   }, [calcSelections]);
 
-  const filteredGallery = useMemo(() => {
-    return galleryItems.filter((item) => galleryFilter === "all" || item[0] === galleryFilter);
-  }, [galleryFilter]);
-
-  const filteredAdminRows = useMemo(() => {
-    const query = adminState.query.trim().toLowerCase();
-    if (!query) {
-      return adminState.rows;
-    }
-
-    return adminState.rows.filter((row) => {
-      return [row.student_name, row.selected_courses, row.contact_number, row.id]
-        .join(" ")
-        .toLowerCase()
-        .includes(query);
-    });
-  }, [adminState.query, adminState.rows]);
-
-  const filteredMessages = useMemo(() => {
-    const query = messageState.query.trim().toLowerCase();
-    if (!query) {
-      return messageState.rows;
-    }
-
-    return messageState.rows.filter((row) =>
-      [row.sender_name, row.phone_number, row.message, row.status].join(" ").toLowerCase().includes(query),
-    );
-  }, [messageState.query, messageState.rows]);
-
   const adminStats = useMemo(() => {
-    const rows = adminState.rows;
     return {
-      total: rows.length,
-      pending: rows.filter((row) => row.payment_status === "pending").length,
-      paid: rows.filter((row) => row.payment_status === "paid" || row.payment_status === "confirmed")
-        .length,
+      total: adminState.stats.total,
+      pending: adminState.stats.pending,
+      paid: adminState.stats.paid,
     };
-  }, [adminState.rows]);
+  }, [adminState.stats]);
 
   const messageStats = useMemo(() => {
-    const rows = messageState.rows;
     return {
-      total: rows.length,
-      fresh: rows.filter((row) => row.status === "new").length,
-      resolved: rows.filter((row) => row.status === "done").length,
+      total: messageState.stats.total,
+      fresh: messageState.stats.fresh,
+      resolved: messageState.stats.resolved,
     };
-  }, [messageState.rows]);
+  }, [messageState.stats]);
+  const totalAdminPages = useMemo(() => Math.max(1, Math.ceil(adminState.total / 20)), [adminState.total]);
+  const totalMessagePages = useMemo(() => Math.max(1, Math.ceil(messageState.total / 20)), [messageState.total]);
 
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(siteSettings.location)}`;
   const whatsappUrl = `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(
     `Hello, I want to know more about admissions at ${siteSettings.shortName}.`,
   )}`;
+  const upiPaymentLink =
+    calculatorTotal && siteSettings.upiId
+      ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
+          siteSettings.upiPayeeName || siteSettings.shortName,
+        )}&am=${calculatorTotal}&cu=INR&tn=${encodeURIComponent(siteSettings.upiPaymentNote || "Admission fee payment")}`
+      : "";
 
   const showToast = (message) => setToast(message);
+
+  const copyUpiId = async () => {
+    if (!siteSettings.upiId) {
+      showToast("Add a UPI ID from admin settings first.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(siteSettings.upiId);
+      showToast("UPI ID copied.");
+    } catch {
+      showToast("Unable to copy UPI ID on this device.");
+    }
+  };
 
   const downloadReceipt = async (receipt) => {
     const { jsPDF } = await import("jspdf");
@@ -487,17 +496,41 @@ function App() {
         payload.rows.find((row) => row.setting_key === "contact_phone")?.setting_value ||
         siteSettingsDefaults.contactPhone,
       upiId: payload.rows.find((row) => row.setting_key === "upi_id")?.setting_value || "",
+      upiPayeeName:
+        payload.rows.find((row) => row.setting_key === "upi_payee_name")?.setting_value ||
+        siteSettingsDefaults.upiPayeeName,
+      upiQrImageUrl:
+        payload.rows.find((row) => row.setting_key === "upi_qr_image_url")?.setting_value || "",
+      upiPaymentNote:
+        payload.rows.find((row) => row.setting_key === "upi_payment_note")?.setting_value ||
+        siteSettingsDefaults.upiPaymentNote,
     };
 
     setSiteSettings(mappedSettings);
     setSettingsForm(mappedSettings);
+    setAdminAccessForm((current) => ({
+      ...current,
+      username: credentials.username,
+      newPassword: "",
+      confirmPassword: "",
+    }));
   };
 
-  const loadAdminRows = async (credentials = adminCredentials) => {
+  const loadAdminRows = async (credentials = adminCredentials, overrides = {}) => {
+    const nextQuery = overrides.query ?? adminState.query;
+    const nextPage = overrides.page ?? adminState.page;
+    const params = new URLSearchParams({
+      limit: "20",
+      offset: String((nextPage - 1) * 20),
+    });
+    if (nextQuery.trim()) {
+      params.set("query", nextQuery.trim());
+    }
+
     setAdminState((current) => ({ ...current, loading: true, error: "" }));
 
     try {
-      const response = await fetch("/api/admin/registrations", {
+      const response = await fetch(`/api/admin/registrations?${params.toString()}`, {
         headers: {
           "x-admin-user": credentials.username,
           "x-admin-pass": credentials.password,
@@ -512,24 +545,38 @@ function App() {
       setAdminState((current) => ({
         ...current,
         rows: payload.rows,
+        total: payload.total || 0,
+        stats: payload.stats || current.stats,
+        page: nextPage,
+        query: nextQuery,
         loading: false,
         error: "",
       }));
       await loadAdminSettings(credentials);
-      setAdminLoggedIn(true);
     } catch (error) {
       setAdminState((current) => ({
         ...current,
         loading: false,
         error: error.message || "Admin login failed.",
       }));
+      throw error;
     }
   };
 
-  const loadMessages = async (credentials = adminCredentials) => {
+  const loadMessages = async (credentials = adminCredentials, overrides = {}) => {
+    const nextQuery = overrides.query ?? messageState.query;
+    const nextPage = overrides.page ?? messageState.page;
+    const params = new URLSearchParams({
+      limit: "20",
+      offset: String((nextPage - 1) * 20),
+    });
+    if (nextQuery.trim()) {
+      params.set("query", nextQuery.trim());
+    }
+
     setMessageState((current) => ({ ...current, loading: true, error: "" }));
     try {
-      const response = await fetch("/api/admin/messages", {
+      const response = await fetch(`/api/admin/messages?${params.toString()}`, {
         headers: {
           "x-admin-user": credentials.username,
           "x-admin-pass": credentials.password,
@@ -540,23 +587,80 @@ function App() {
         throw new Error(payload.error || "Unable to load messages.");
       }
 
-      setMessageState((current) => ({ ...current, rows: payload.rows, loading: false, error: "" }));
+      setMessageState((current) => ({
+        ...current,
+        rows: payload.rows,
+        total: payload.total || 0,
+        stats: payload.stats || current.stats,
+        page: nextPage,
+        query: nextQuery,
+        loading: false,
+        error: "",
+      }));
     } catch (error) {
       setMessageState((current) => ({
         ...current,
         loading: false,
         error: error.message || "Unable to load messages.",
       }));
+      throw error;
     }
   };
 
   const adminLogin = async (event) => {
     event.preventDefault();
-    await loadAdminRows();
-    await loadMessages();
+
+    if (!adminCredentials.username.trim() || !adminCredentials.password.trim()) {
+      setAdminState((current) => ({ ...current, error: "Enter admin username and password." }));
+      return;
+    }
+
+    const credentials = {
+      username: adminCredentials.username.trim(),
+      password: adminCredentials.password,
+    };
+
+    try {
+      await Promise.all([
+        loadAdminRows(credentials, { page: 1, query: "" }),
+        loadMessages(credentials, { page: 1, query: "" }),
+      ]);
+      setAdminLoggedIn(true);
+    } catch {
+      setAdminLoggedIn(false);
+    }
   };
 
+  useEffect(() => {
+    if (!adminLoggedIn) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => {
+      loadAdminRows(adminCredentials).catch(() => {});
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [adminLoggedIn, adminState.query, adminState.page]);
+
+  useEffect(() => {
+    if (!adminLoggedIn) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => {
+      loadMessages(adminCredentials).catch(() => {});
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [adminLoggedIn, messageState.query, messageState.page]);
+
   const saveAdminSettings = async () => {
+    if (adminAccessForm.newPassword && adminAccessForm.newPassword !== adminAccessForm.confirmPassword) {
+      showToast("New password and confirm password must match.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/admin/settings", {
         method: "PUT",
@@ -572,6 +676,14 @@ function App() {
           whatsapp_number: settingsForm.whatsappNumber,
           contact_phone: settingsForm.contactPhone,
           upi_id: settingsForm.upiId,
+          upi_payee_name: settingsForm.upiPayeeName,
+          upi_qr_image_url: settingsForm.upiQrImageUrl,
+          upi_payment_note: settingsForm.upiPaymentNote,
+          admin_username:
+            adminAccessForm.username && adminAccessForm.username !== adminCredentials.username
+              ? adminAccessForm.username
+              : undefined,
+          admin_password: adminAccessForm.newPassword || undefined,
         }),
       });
 
@@ -581,6 +693,10 @@ function App() {
       }
 
       setSiteSettings(settingsForm);
+      if (adminAccessForm.username && adminAccessForm.username !== adminCredentials.username) {
+        setAdminCredentials((current) => ({ ...current, username: adminAccessForm.username }));
+      }
+      setAdminAccessForm((current) => ({ ...current, newPassword: "", confirmPassword: "" }));
       showToast("Admin settings updated successfully.");
     } catch (error) {
       showToast(error.message || "Unable to save settings.");
@@ -915,61 +1031,89 @@ function App() {
             </div>
 
             <div className="calc-result">
-              <div>
-                <div className="calc-result-label">Total Estimated Fee</div>
-                <div className="calc-result-total">Rs. {calculatorTotal.toLocaleString("en-IN")}</div>
-                <div className="calc-result-label subtle">
-                  {selectedCalculatorLabels || "No course selected"}
-                  {calcSelections.typing && calcTypingOption ? ` - ${calcTypingOption}` : ""}
+              <div className="calc-result-summary">
+                <div>
+                  <div className="calc-result-label">Total Estimated Fee</div>
+                  <div className="calc-result-total">Rs. {calculatorTotal.toLocaleString("en-IN")}</div>
+                  <div className="calc-result-label subtle">
+                    {selectedCalculatorLabels || "No course selected"}
+                    {calcSelections.typing && calcTypingOption ? ` - ${calcTypingOption}` : ""}
+                  </div>
+                </div>
+                <div className="calc-result-actions">
+                  <button className="calc-upi-btn secondary" type="button" onClick={copyUpiId}>
+                    Copy UPI ID
+                  </button>
+                  <a
+                    className={upiPaymentLink ? "calc-upi-btn" : "calc-upi-btn disabled"}
+                    href={
+                      upiPaymentLink ||
+                      "#fee-calc"
+                    }
+                    onClick={(event) => {
+                      if (!calculatorTotal) {
+                        event.preventDefault();
+                        showToast("Please select at least one course first.");
+                        return;
+                      }
+                      if (!siteSettings.upiId) {
+                        event.preventDefault();
+                        showToast("UPI is not configured yet. Update it from admin settings.");
+                      }
+                    }}
+                  >
+                    Pay via UPI / QR
+                  </a>
                 </div>
               </div>
-              <button
-                className="calc-upi-btn"
-                type="button"
-                onClick={() => {
-                  if (!calculatorTotal) {
-                    showToast("Please select at least one course first.");
-                    return;
-                  }
-                  showToast(
-                    `UPI payment for Rs. ${calculatorTotal.toLocaleString("en-IN")} will use ${siteSettings.upiId}.`,
-                  );
-                }}
-              >
-                Pay via UPI / QR
-              </button>
+
+              <div className="calc-payment-panel">
+                <div className="calc-qr-card">
+                  {siteSettings.upiQrImageUrl ? (
+                    <img
+                      className="calc-qr-image"
+                      src={siteSettings.upiQrImageUrl}
+                      alt="Institute UPI QR code"
+                    />
+                  ) : (
+                    <div className="calc-qr-empty">
+                      <strong>QR not added yet</strong>
+                      <span>Add a QR image URL from admin to show scannable payment here.</span>
+                    </div>
+                  )}
+                </div>
+                <div className="calc-payment-copy">
+                  <div className="calc-payment-kicker">UPI Payment</div>
+                  <h3>{siteSettings.upiPayeeName || siteSettings.shortName}</h3>
+                  <div className="calc-upi-id">{siteSettings.upiId || "UPI ID not configured yet"}</div>
+                  <p>
+                    {siteSettings.upiPaymentNote ||
+                      "Add a payment note from admin settings for clearer payment references."}
+                  </p>
+                  <ul className="calc-payment-meta">
+                    <li>Currency: INR only</li>
+                    <li>Amount: Rs. {calculatorTotal.toLocaleString("en-IN")}</li>
+                    <li>Status: Share payment screenshot on WhatsApp after paying</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="gallery" className="mist-section">
+        <section id="process" className="mist-section">
           <SectionHead
-            tag="Our Institute"
-            title="Photo"
-            accent="Gallery"
-            description="A look into classrooms, students, events, and certificate moments."
+            tag="Simple Admission"
+            title="How It"
+            accent="Works"
+            description="The site is focused on enquiry, payment, and admin follow-up, so this section replaces the old gallery with something more useful."
           />
-          <div className="gallery-filter">
-            {["all", "classroom", "students", "events", "certificates"].map((item) => (
-              <button
-                className={galleryFilter === item ? "filter-btn active" : "filter-btn"}
-                key={item}
-                onClick={() => setGalleryFilter(item)}
-                type="button"
-              >
-                {item === "all" ? "All" : item.charAt(0).toUpperCase() + item.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="gallery-grid">
-            {filteredGallery.map(([category, label, tone]) => (
-              <article className={`gallery-item tone-${tone}`} key={`${category}-${label}`} data-reveal="">
-                <div className="gallery-img-placeholder">
-                  <span>{label}</span>
-                </div>
-                <div className="gallery-overlay">
-                  <div className="gallery-caption">{label}</div>
-                </div>
+          <div className="process-grid">
+            {processSteps.map(([step, title, description]) => (
+              <article className="process-card" key={step} data-reveal="">
+                <span className="process-step">{step}</span>
+                <h3>{title}</h3>
+                <p>{description}</p>
               </article>
             ))}
           </div>
@@ -1280,7 +1424,7 @@ function App() {
             {!adminLoggedIn ? (
               <div className="admin-login-box">
                 <h2>Admin Login</h2>
-                <p>Use your admin username and password to access enquiries, messages, and settings.</p>
+                <p>Use your private admin credentials to access enquiries, messages, payment settings, and dashboard controls.</p>
                 <form onSubmit={adminLogin}>
                   <input
                     className="admin-input"
@@ -1328,7 +1472,6 @@ function App() {
                   </button>
                 </form>
                 {adminState.error ? <p className="admin-error">{adminState.error}</p> : null}
-                <p className="admin-help">After updating Supabase schema, use: `admin` / `admin12345`</p>
               </div>
             ) : (
               <div className="admin-dashboard">
@@ -1339,8 +1482,24 @@ function App() {
                     onClick={() => {
                       window.location.href = window.location.pathname;
                       setAdminLoggedIn(false);
-                      setAdminState({ rows: [], loading: false, error: "", query: "" });
-                      setMessageState({ rows: [], loading: false, error: "", query: "" });
+                      setAdminState({
+                        rows: [],
+                        loading: false,
+                        error: "",
+                        query: "",
+                        page: 1,
+                        total: 0,
+                        stats: { total: 0, pending: 0, paid: 0 },
+                      });
+                      setMessageState({
+                        rows: [],
+                        loading: false,
+                        error: "",
+                        query: "",
+                        page: 1,
+                        total: 0,
+                        stats: { total: 0, fresh: 0, resolved: 0 },
+                      });
                     }}
                     type="button"
                   >
@@ -1349,6 +1508,22 @@ function App() {
                 </div>
 
                 <div className="admin-body">
+                  <div className="admin-hero-panel">
+                    <div>
+                      <span className="admin-hero-kicker">Control Center</span>
+                      <h3>Manage enquiries, payment details, messages, and institute settings from one place.</h3>
+                      <p>
+                        Update the public site content instantly. Payment settings here control the fee calculator, QR block, UPI ID, and payment link on the live site.
+                      </p>
+                    </div>
+                    <div className="admin-hero-badges">
+                      <span>Admissions</span>
+                      <span>Messages</span>
+                      <span>Payments</span>
+                      <span>Site Settings</span>
+                    </div>
+                  </div>
+
                   <div className="admin-stats">
                     <StatCard label="Total Students" value={adminStats.total} />
                     <StatCard label="Pending Payment" tone="gold" value={adminStats.pending} />
@@ -1385,73 +1560,167 @@ function App() {
                     <div className="admin-table-head">
                       <h3>Site Settings</h3>
                     </div>
-                    <div className="settings-grid">
-                      <Field label="Institute Name">
-                        <input
-                          value={settingsForm.instituteName}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              instituteName: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Short Name">
-                        <input
-                          value={settingsForm.shortName}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              shortName: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Location">
-                        <input
-                          value={settingsForm.location}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              location: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Contact Phone">
-                        <input
-                          value={settingsForm.contactPhone}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              contactPhone: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="WhatsApp Number">
-                        <input
-                          value={settingsForm.whatsappNumber}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              whatsappNumber: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="UPI ID">
-                        <input
-                          value={settingsForm.upiId}
-                          onChange={(event) =>
-                            setSettingsForm((current) => ({
-                              ...current,
-                              upiId: event.target.value,
-                            }))
-                          }
-                        />
-                      </Field>
+                    <div className="settings-shell">
+                      <section className="settings-section-card">
+                        <div className="settings-section-head">
+                          <h4>Institute Details</h4>
+                          <p>These fields power the public header, contact area, footer, and WhatsApp/Maps actions.</p>
+                        </div>
+                        <div className="settings-grid">
+                          <Field label="Institute Name">
+                            <input
+                              value={settingsForm.instituteName}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  instituteName: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="Short Name">
+                            <input
+                              value={settingsForm.shortName}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  shortName: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="Location">
+                            <input
+                              value={settingsForm.location}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  location: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="Contact Phone">
+                            <input
+                              value={settingsForm.contactPhone}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  contactPhone: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="WhatsApp Number">
+                            <input
+                              value={settingsForm.whatsappNumber}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  whatsappNumber: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                        </div>
+                      </section>
+
+                      <section className="settings-section-card">
+                        <div className="settings-section-head">
+                          <h4>Payment Settings</h4>
+                          <p>These fields control the fee calculator payment panel, UPI payment link, and QR block.</p>
+                        </div>
+                        <div className="settings-grid">
+                          <Field label="UPI ID">
+                            <input
+                              value={settingsForm.upiId}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  upiId: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="UPI Payee Name">
+                            <input
+                              value={settingsForm.upiPayeeName}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  upiPayeeName: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="QR Image URL">
+                            <input
+                              value={settingsForm.upiQrImageUrl}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  upiQrImageUrl: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="Payment Note">
+                            <input
+                              value={settingsForm.upiPaymentNote}
+                              onChange={(event) =>
+                                setSettingsForm((current) => ({
+                                  ...current,
+                                  upiPaymentNote: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                        </div>
+                      </section>
+
+                      <section className="settings-section-card">
+                        <div className="settings-section-head">
+                          <h4>Admin Access</h4>
+                          <p>Change the admin username or set a new password after your first login.</p>
+                        </div>
+                        <div className="settings-grid">
+                          <Field label="Admin Username">
+                            <input
+                              value={adminAccessForm.username}
+                              onChange={(event) =>
+                                setAdminAccessForm((current) => ({
+                                  ...current,
+                                  username: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="New Password">
+                            <input
+                              type="password"
+                              value={adminAccessForm.newPassword}
+                              onChange={(event) =>
+                                setAdminAccessForm((current) => ({
+                                  ...current,
+                                  newPassword: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                          <Field label="Confirm Password">
+                            <input
+                              type="password"
+                              value={adminAccessForm.confirmPassword}
+                              onChange={(event) =>
+                                setAdminAccessForm((current) => ({
+                                  ...current,
+                                  confirmPassword: event.target.value,
+                                }))
+                              }
+                            />
+                          </Field>
+                        </div>
+                      </section>
                     </div>
                     <button className="submit-btn admin-save-btn" onClick={saveAdminSettings} type="button">
                       Save Settings
@@ -1468,7 +1737,11 @@ function App() {
                         placeholder="Search student"
                         value={adminState.query}
                         onChange={(event) =>
-                          setAdminState((current) => ({ ...current, query: event.target.value }))
+                          setAdminState((current) => ({
+                            ...current,
+                            query: event.target.value,
+                            page: 1,
+                          }))
                         }
                       />
                     </div>
@@ -1488,7 +1761,7 @@ function App() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredAdminRows.map((row) => (
+                          {adminState.rows.map((row) => (
                             <tr key={row.id}>
                               <td>{row.id}</td>
                               <td>{row.student_code}</td>
@@ -1529,6 +1802,42 @@ function App() {
                         </tbody>
                       </table>
                     </div>
+                    <div className="admin-table-foot">
+                      <div className="table-meta">
+                        {adminState.loading ? "Loading enquiries..." : `${adminState.total} total enquiries`}
+                      </div>
+                      <div className="table-pagination">
+                        <button
+                          className="action-btn secondary"
+                          disabled={adminState.page <= 1 || adminState.loading}
+                          onClick={() =>
+                            setAdminState((current) => ({
+                              ...current,
+                              page: Math.max(1, current.page - 1),
+                            }))
+                          }
+                          type="button"
+                        >
+                          Previous
+                        </button>
+                        <span>
+                          Page {adminState.page} of {totalAdminPages}
+                        </span>
+                        <button
+                          className="action-btn secondary"
+                          disabled={adminState.page >= totalAdminPages || adminState.loading}
+                          onClick={() =>
+                            setAdminState((current) => ({
+                              ...current,
+                              page: Math.min(totalAdminPages, current.page + 1),
+                            }))
+                          }
+                          type="button"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   ) : null}
 
@@ -1541,7 +1850,11 @@ function App() {
                         placeholder="Search messages"
                         value={messageState.query}
                         onChange={(event) =>
-                          setMessageState((current) => ({ ...current, query: event.target.value }))
+                          setMessageState((current) => ({
+                            ...current,
+                            query: event.target.value,
+                            page: 1,
+                          }))
                         }
                       />
                     </div>
@@ -1558,7 +1871,7 @@ function App() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredMessages.map((row) => (
+                          {messageState.rows.map((row) => (
                             <tr key={row.id}>
                               <td>{row.id}</td>
                               <td>{row.sender_name}</td>
@@ -1584,6 +1897,42 @@ function App() {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                    <div className="admin-table-foot">
+                      <div className="table-meta">
+                        {messageState.loading ? "Loading messages..." : `${messageState.total} total messages`}
+                      </div>
+                      <div className="table-pagination">
+                        <button
+                          className="action-btn secondary"
+                          disabled={messageState.page <= 1 || messageState.loading}
+                          onClick={() =>
+                            setMessageState((current) => ({
+                              ...current,
+                              page: Math.max(1, current.page - 1),
+                            }))
+                          }
+                          type="button"
+                        >
+                          Previous
+                        </button>
+                        <span>
+                          Page {messageState.page} of {totalMessagePages}
+                        </span>
+                        <button
+                          className="action-btn secondary"
+                          disabled={messageState.page >= totalMessagePages || messageState.loading}
+                          onClick={() =>
+                            setMessageState((current) => ({
+                              ...current,
+                              page: Math.min(totalMessagePages, current.page + 1),
+                            }))
+                          }
+                          type="button"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
                   ) : null}

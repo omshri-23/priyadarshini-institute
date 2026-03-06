@@ -1,4 +1,4 @@
-import { authorizeAdmin, json, supabaseFetch } from "../_lib/supabase.js";
+import { authorizeAdmin, hashPassword, json, supabaseFetch } from "../_lib/supabase.js";
 
 const allowedKeys = [
   "institute_name",
@@ -7,6 +7,9 @@ const allowedKeys = [
   "whatsapp_number",
   "contact_phone",
   "upi_id",
+  "upi_payee_name",
+  "upi_qr_image_url",
+  "upi_payment_note",
 ];
 
 export default async function handler(request, response) {
@@ -44,6 +47,40 @@ export default async function handler(request, response) {
 
         if (!result.ok) {
           return json(response, 500, { error: await result.text() });
+        }
+      }
+
+      const currentUsername = request.headers["x-admin-user"];
+      const nextUsername = String(settings.admin_username || "").trim();
+      const nextPassword = String(settings.admin_password || "").trim();
+
+      if (nextUsername && nextUsername !== currentUsername) {
+        const renameResult = await supabaseFetch(
+          `/rest/v1/admin_users?username=eq.${encodeURIComponent(currentUsername)}`,
+          {
+            method: "PATCH",
+            headers: { Prefer: "return=minimal" },
+            body: JSON.stringify({ username: nextUsername }),
+          },
+        );
+
+        if (!renameResult.ok) {
+          return json(response, 500, { error: await renameResult.text() });
+        }
+      }
+
+      if (nextPassword) {
+        const passwordResult = await supabaseFetch(
+          `/rest/v1/admin_users?username=eq.${encodeURIComponent(nextUsername || currentUsername)}`,
+          {
+            method: "PATCH",
+            headers: { Prefer: "return=minimal" },
+            body: JSON.stringify({ password_hash: hashPassword(nextPassword) }),
+          },
+        );
+
+        if (!passwordResult.ok) {
+          return json(response, 500, { error: await passwordResult.text() });
         }
       }
 

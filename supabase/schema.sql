@@ -48,7 +48,10 @@ values
   ('location', 'Near Tahsildar Office main road - Shirol, Kolhapur'),
   ('whatsapp_number', '917558628660'),
   ('contact_phone', '+91 755 862 8660'),
-  ('upi_id', '')
+  ('upi_id', ''),
+  ('upi_payee_name', 'Priyadarshini Institute'),
+  ('upi_qr_image_url', ''),
+  ('upi_payment_note', 'Admission fee payment')
 on conflict (setting_key) do nothing;
 
 insert into public.admin_users (username, password_hash, is_active)

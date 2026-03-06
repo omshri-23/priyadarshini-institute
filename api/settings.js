@@ -7,6 +7,9 @@ const defaults = {
   whatsapp_number: "917558628660",
   contact_phone: "+91 755 862 8660",
   upi_id: "",
+  upi_payee_name: "Priyadarshini Institute",
+  upi_qr_image_url: "",
+  upi_payment_note: "Admission fee payment",
 };
 
 export default async function handler(request, response) {
