@@ -54,9 +54,10 @@ const courseCards = [
 const whyCards = [
   ["CT", "Certified Training", "Aligned with recognized certification standards and exam-oriented learning."],
   ["EF", "Experienced Faculty", "Practical teachers focused on student clarity, confidence, and outcomes."],
+  ["16+", "16+ Years Experience", "Trusted institute experience with long-running local teaching support and consistent student guidance."],
   ["PL", "Practical Learning", "Hands-on lab sessions, live software use, and structured daily practice."],
   ["AF", "Affordable Fees", "Career-relevant courses offered at accessible pricing with guided support."],
-  ["LO", "Prime Location", "Convenient campus access near Tahsildar Office on Main Road, Shirol."],
+  ["LO", "Prime Location", "Campus access near Tahsildar Office Main Road, plus Bhaji Mandai in front of Hanuman Temple, Shirol."],
   ["PR", "Proven Results", "Students move into jobs, exam readiness, and stronger digital confidence."],
 ];
 
@@ -129,7 +130,8 @@ const faqs = [
 const siteSettingsDefaults = {
   instituteName: "Priyadarshini Computer & Typewriting Institute, Shirol",
   shortName: "Priyadarshini Computer & Typewriting Institute",
-  location: "Near Tahsildar Office main road - Shirol, Kolhapur",
+  location:
+    "Near Tahsildar Office Main Road, Shirol, Kolhapur. 2nd address: Bhaji Mandai, front of Hanuman Temple, Shirol.",
   whatsappNumber: "917558628660",
   contactPhone: "+91 755 862 8660",
   upiId: "",
@@ -841,6 +843,11 @@ function App() {
                 career-oriented, certification-driven training in a clean,
                 supportive, and job-focused learning environment.
               </p>
+              <div className="hero-highlights">
+                <span>16+ years experience</span>
+                <span>Shirol, Kolhapur</span>
+                <span>Admission guidance + practical training</span>
+              </div>
               <div className="hero-addr">
                 <span className="pin">+</span>
                 <span>{siteSettings.location}</span>
@@ -991,9 +998,12 @@ function App() {
             tag="Plan Your Budget"
             title="Fee"
             accent="Calculator"
-            description="Select the courses you need and get the fee estimate instantly."
+            description="Tap a course card below to select it, then review the total and payment details instantly."
           />
           <div className="calc-wrap" data-reveal="">
+            <div className="calc-help-strip">
+              <strong>How to use:</strong> select one or more course cards below. Selected cards turn green and add to the total immediately.
+            </div>
             <div className="calc-courses">
               {calculatorCourses.map((course) => {
                 const selected = Boolean(calcSelections[course.id]);
@@ -1003,11 +1013,13 @@ function App() {
                     key={course.id}
                     type="button"
                     onClick={() => toggleCalcCourse(course.id, course.fee)}
+                    aria-pressed={selected}
                   >
-                    <span className="calc-checkbox">{selected ? "x" : ""}</span>
+                    <span className="calc-checkbox">{selected ? "OK" : "+"}</span>
                     <div className="calc-course-name">{course.label}</div>
                     <div className="calc-course-dur">{course.meta}</div>
                     <div className="calc-course-fee">Rs. {course.fee.toLocaleString("en-IN")}</div>
+                    <div className="calc-course-state">{selected ? "Selected" : "Tap to Select"}</div>
                   </button>
                 );
               })}

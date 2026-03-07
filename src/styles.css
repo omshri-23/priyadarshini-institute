@@ -301,6 +301,26 @@ section {
   gap: 1rem;
 }
 
+.hero-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0 1.1rem;
+}
+
+.hero-highlights span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(26, 107, 107, 0.12);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .hero-addr {
   display: flex;
   gap: 8px;
@@ -511,8 +531,7 @@ section {
 .why-card,
 .process-card,
 .faq-item,
-.contact-item,
-.calc-course-card {
+.contact-item {
   transform: translateY(24px);
   opacity: 0;
   transition: transform 0.5s ease, opacity 0.5s ease, box-shadow 0.3s ease;
@@ -700,31 +719,61 @@ select {
   gap: 1rem;
 }
 
+.calc-help-strip {
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  background: rgba(26, 107, 107, 0.08);
+  color: #40515f;
+  line-height: 1.6;
+}
+
+.calc-help-strip strong {
+  color: var(--teal);
+}
+
 .calc-course-card {
   position: relative;
   padding: 1.4rem;
   text-align: left;
   background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
 .calc-course-card.selected {
   border-color: var(--teal);
-  background: rgba(26, 107, 107, 0.05);
+  background: rgba(26, 107, 107, 0.08);
+  box-shadow: 0 12px 26px rgba(26, 107, 107, 0.16);
+}
+
+.calc-course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
 }
 
 .calc-checkbox {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  min-width: 34px;
+  height: 24px;
+  padding: 0 0.45rem;
+  border-radius: 999px;
   background: rgba(26, 107, 107, 0.12);
   color: var(--teal);
   display: grid;
   place-items: center;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
+}
+
+.calc-course-state {
+  margin-top: 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--teal);
 }
 
 .calc-typing-opts,
@@ -1792,7 +1841,8 @@ button:disabled {
   }
 
   .hero-addr,
-  .hero-btns {
+  .hero-btns,
+  .hero-highlights {
     justify-content: center;
   }
 
