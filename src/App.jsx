@@ -143,7 +143,7 @@ const siteSettingsDefaults = {
 const navItems = [
   ["home", "Home"],
   ["courses", "Courses"],
-  ["fee-calc", "Fee Calc"],
+  ["fee-calc", "Course Fees"],
   ["process", "Process"],
   ["faq", "FAQ"],
   ["contact", "Contact"],
@@ -174,20 +174,6 @@ function getAdmissionAmount(courses) {
   return (courses || []).reduce((sum, course) => sum + (courseFeeMap[course] || 0), 0);
 }
 
-function deriveAdmissionCoursesFromCalculator(calcSelections, calcTypingOption) {
-  const courses = [];
-  if (calcSelections.mscit) {
-    courses.push("MS-CIT");
-  }
-  if (calcSelections.tally) {
-    courses.push("Tally Prime");
-  }
-  if (calcSelections.typing) {
-    courses.push(calcTypingOption.startsWith("Marathi") ? "Typing - Marathi" : "Typing - English");
-  }
-  return courses;
-}
-
 function App() {
   const admissionRef = useRef(null);
   const paymentRef = useRef(null);
@@ -196,8 +182,6 @@ function App() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [toast, setToast] = useState("");
   const [activeFaq, setActiveFaq] = useState(null);
-  const [calcSelections, setCalcSelections] = useState({});
-  const [calcTypingOption, setCalcTypingOption] = useState("");
   const [admissionForm, setAdmissionForm] = useState(initialAdmissionForm);
   const [submittedAdmission, setSubmittedAdmission] = useState(null);
   const [isSubmittingAdmission, setIsSubmittingAdmission] = useState(false);
@@ -317,18 +301,6 @@ function App() {
     loadHighlights();
   }, []);
 
-  const calculatorTotal = useMemo(
-    () => Object.values(calcSelections).reduce((sum, fee) => sum + fee, 0),
-    [calcSelections],
-  );
-
-  const selectedCalculatorLabels = useMemo(() => {
-    return calculatorCourses
-      .filter((course) => calcSelections[course.id])
-      .map((course) => course.label)
-      .join(" + ");
-  }, [calcSelections]);
-
   const adminStats = useMemo(() => {
     return {
       total: adminState.stats.total,
@@ -356,12 +328,6 @@ function App() {
   const branchTwoAddress = "Bhaji Mandai, front of Hanuman Temple, Shirol";
   const branchOneMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchOneAddress)}`;
   const branchTwoMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchTwoAddress)}`;
-  const upiPaymentLink =
-    calculatorTotal && siteSettings.upiId
-      ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
-          siteSettings.upiPayeeName || siteSettings.shortName,
-        )}&am=${calculatorTotal}&cu=INR&tn=${encodeURIComponent(siteSettings.upiPaymentNote || "Admission fee payment")}`
-      : "";
   const submittedPaymentLink =
     submittedAdmission && siteSettings.upiId
       ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
@@ -372,20 +338,6 @@ function App() {
       : "";
 
   const showToast = (message) => setToast(message);
-
-  const copyUpiId = async () => {
-    if (!siteSettings.upiId) {
-      showToast("Add a UPI ID from admin settings first.");
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(siteSettings.upiId);
-      showToast("UPI ID copied.");
-    } catch {
-      showToast("Unable to copy UPI ID on this device.");
-    }
-  };
 
   const downloadReceipt = async (receipt) => {
     const { jsPDF } = await import("jspdf");
@@ -417,40 +369,6 @@ function App() {
   const scrollToForm = (course) => {
     admissionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     setAdmissionForm((current) => ({ ...current, courses: [course] }));
-  };
-
-  const continueToAdmissionFromCalculator = () => {
-    const selectedCourses = deriveAdmissionCoursesFromCalculator(calcSelections, calcTypingOption);
-
-    if (selectedCourses.length === 0) {
-      showToast("Select at least one course first.");
-      return;
-    }
-
-    if (calcSelections.typing && !calcTypingOption) {
-      showToast("Select the typing language and speed first.");
-      return;
-    }
-
-    admissionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setAdmissionForm((current) => ({
-      ...current,
-      courses: selectedCourses,
-      typingOptions: calcSelections.typing && calcTypingOption ? [calcTypingOption] : current.typingOptions,
-    }));
-    showToast("Course selection moved to the admission form. Submit your details first, then complete payment.");
-  };
-
-  const toggleCalcCourse = (id, fee) => {
-    setCalcSelections((current) => {
-      const next = { ...current };
-      if (next[id]) {
-        delete next[id];
-      } else {
-        next[id] = fee;
-      }
-      return next;
-    });
   };
 
   const onAdmissionChange = (field, value) => {
@@ -1097,102 +1015,39 @@ function App() {
 
         <section id="fee-calc" className="light-section">
           <SectionHead
-            tag="Plan Your Budget"
+            tag="Course Fees"
             title="Fee"
-            accent="Calculator"
-            description="Tap a course card below to select it, then review the total and payment details instantly."
+            accent="Overview"
+            description="Course fees are shown clearly here. Payment happens only after the admission form is submitted, so admin always receives the student details first."
           />
           <div className="calc-wrap" data-reveal="">
             <div className="calc-help-strip">
-              <strong>How to use:</strong> select one or more course cards below. Selected cards turn green and add to the total immediately.
+              <strong>Admission flow:</strong> choose your course below, fill the admission form, then the payment panel opens automatically with your student code, amount, UPI, and WhatsApp confirmation step.
             </div>
             <div className="calc-courses">
-              {calculatorCourses.map((course) => {
-                const selected = Boolean(calcSelections[course.id]);
-                return (
-                  <button
-                    className={selected ? "calc-course-card selected" : "calc-course-card"}
-                    key={course.id}
-                    type="button"
-                    onClick={() => toggleCalcCourse(course.id, course.fee)}
-                    aria-pressed={selected}
-                  >
-                    <span className="calc-checkbox">{selected ? "OK" : "+"}</span>
-                    <div className="calc-course-name">{course.label}</div>
-                    <div className="calc-course-dur">{course.meta}</div>
-                    <div className="calc-course-fee">Rs. {course.fee.toLocaleString("en-IN")}</div>
-                    <div className="calc-course-state">{selected ? "Selected" : "Tap to Select"}</div>
+              {calculatorCourses.map((course) => (
+                <article className="calc-course-card fee-card-static" key={course.id}>
+                  <div className="calc-course-name">{course.label}</div>
+                  <div className="calc-course-dur">{course.meta}</div>
+                  <div className="calc-course-fee">Rs. {course.fee.toLocaleString("en-IN")}</div>
+                  <button className="calc-upi-btn fee-card-btn" type="button" onClick={() => scrollToForm(course.label === "Typewriting" ? "Typing - English" : course.label)}>
+                    Select This Course
                   </button>
-                );
-              })}
+                </article>
+              ))}
             </div>
-
-            <div className={calcSelections.typing ? "calc-typing-opts show" : "calc-typing-opts"}>
-              <h4>Select Typing Language and Speed</h4>
-              <div className="calc-typing-row">
-                {typingChoices.map((choice) => (
-                  <label className="check-item" key={choice}>
-                    <input
-                      checked={calcTypingOption === choice}
-                      name="calcTyping"
-                      onChange={() => setCalcTypingOption(choice)}
-                      type="radio"
-                    />
-                    {choice}
-                  </label>
-                ))}
+            <div className="fee-flow-note">
+              <div className="fee-flow-step">
+                <strong>1. Fill admission form</strong>
+                <span>Student details are saved first so admin knows exactly who is paying.</span>
               </div>
-            </div>
-
-            <div className="calc-result">
-              <div className="calc-result-summary">
-                <div>
-                  <div className="calc-result-label">Total Estimated Fee</div>
-                  <div className="calc-result-total">Rs. {calculatorTotal.toLocaleString("en-IN")}</div>
-                  <div className="calc-result-label subtle">
-                    {selectedCalculatorLabels || "No course selected"}
-                    {calcSelections.typing && calcTypingOption ? ` - ${calcTypingOption}` : ""}
-                  </div>
-                </div>
-                <div className="calc-result-actions">
-                  <button className="calc-upi-btn secondary" type="button" onClick={copyUpiId}>
-                    Copy UPI ID
-                  </button>
-                  <button className="calc-upi-btn" onClick={continueToAdmissionFromCalculator} type="button">
-                    Continue to Admission Form
-                  </button>
-                </div>
+              <div className="fee-flow-step">
+                <strong>2. Payment panel opens</strong>
+                <span>The site shows student code, name, phone, amount, QR, and UPI only after submission.</span>
               </div>
-
-              <div className="calc-payment-panel">
-                <div className="calc-qr-card">
-                  {siteSettings.upiQrImageUrl ? (
-                    <img
-                      className="calc-qr-image"
-                      src={siteSettings.upiQrImageUrl}
-                      alt="Institute UPI QR code"
-                    />
-                  ) : (
-                    <div className="calc-qr-empty">
-                      <strong>QR not added yet</strong>
-                      <span>Add a QR image URL from admin to show scannable payment here.</span>
-                    </div>
-                  )}
-                </div>
-                <div className="calc-payment-copy">
-                  <div className="calc-payment-kicker">UPI Payment</div>
-                  <h3>{siteSettings.upiPayeeName || siteSettings.shortName}</h3>
-                  <div className="calc-upi-id">{siteSettings.upiId || "UPI ID not configured yet"}</div>
-                  <p>
-                    {siteSettings.upiPaymentNote ||
-                      "Add a payment note from admin settings for clearer payment references."}
-                  </p>
-                  <ul className="calc-payment-meta">
-                    <li>Currency: INR only</li>
-                    <li>Amount: Rs. {calculatorTotal.toLocaleString("en-IN")}</li>
-                    <li>Step: Submit the admission form first so admin can identify the payment correctly</li>
-                  </ul>
-                </div>
+              <div className="fee-flow-step">
+                <strong>3. Share screenshot</strong>
+                <span>Student sends the payment screenshot on WhatsApp and admin verifies using student code or phone number.</span>
               </div>
             </div>
           </div>
@@ -1460,7 +1315,7 @@ function App() {
                     >
                       Pay Now with Student Code
                     </a>
-                    <a className="calc-upi-btn secondary" href={submittedAdmission.whatsappLink} target="_blank" rel="noreferrer">
+                    <a className="calc-upi-btn payment-whatsapp-btn" href={submittedAdmission.whatsappLink} target="_blank" rel="noreferrer">
                       Send Screenshot on WhatsApp
                     </a>
                   </div>
@@ -1753,7 +1608,7 @@ function App() {
                       <span className="admin-hero-kicker">Control Center</span>
                       <h3>Manage enquiries, payment details, messages, and institute settings from one place.</h3>
                       <p>
-                        Update the public site content instantly. Payment settings here control the fee calculator, QR block, UPI ID, and payment link on the live site.
+                        Update the public site content instantly. Payment settings here control the fee overview, QR block, UPI ID, and payment link on the live site.
                       </p>
                     </div>
                     <div className="admin-hero-badges">
@@ -1882,7 +1737,7 @@ function App() {
                       <section className="settings-section-card">
                         <div className="settings-section-head">
                           <h4>Payment Settings</h4>
-                          <p>These fields control the fee calculator payment panel, UPI payment link, and QR block.</p>
+                          <p>These fields control the post-submission payment panel, UPI payment link, and QR block.</p>
                         </div>
                         <div className="settings-grid">
                           <Field label="UPI ID">

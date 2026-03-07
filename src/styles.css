@@ -832,6 +832,18 @@ select {
   box-shadow: var(--shadow);
 }
 
+.fee-card-static {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 220px;
+}
+
+.fee-card-btn {
+  width: 100%;
+  margin-top: auto;
+}
+
 .calc-checkbox {
   position: absolute;
   top: 12px;
@@ -1124,6 +1136,44 @@ select {
 .payment-proof-buttons {
   flex-wrap: wrap;
   gap: 0.8rem;
+}
+
+.payment-whatsapp-btn {
+  background: rgba(37, 211, 102, 0.12);
+  color: #138a4b;
+  border: 1px solid rgba(37, 211, 102, 0.24);
+  box-shadow: none;
+}
+
+.payment-whatsapp-btn:hover {
+  background: rgba(37, 211, 102, 0.18);
+  color: #0f6e3c;
+}
+
+.fee-flow-note {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.fee-flow-step {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #e5ecef;
+  box-shadow: 0 10px 24px rgba(15, 25, 35, 0.05);
+}
+
+.fee-flow-step strong {
+  color: var(--teal);
+}
+
+.fee-flow-step span {
+  line-height: 1.65;
+  color: #586977;
 }
 
 .subtle {
@@ -2417,6 +2467,10 @@ button:disabled {
 
   .calc-qr-card {
     width: 100%;
+  }
+
+  .fee-flow-note {
+    grid-template-columns: 1fr;
   }
 
   .branch-grid {
