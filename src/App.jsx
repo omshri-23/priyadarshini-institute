@@ -53,8 +53,7 @@ const courseCards = [
 
 const whyCards = [
   ["CT", "Certified Training", "Aligned with recognized certification standards and exam-oriented learning."],
-  ["EF", "Experienced Faculty", "Practical teachers focused on student clarity, confidence, and outcomes."],
-  ["16+", "16+ Years Experience", "Trusted institute experience with long-running local teaching support and consistent student guidance."],
+  ["EF", "Experienced Faculty", "Practical teachers backed by 16+ years of institute experience, focused on student clarity, confidence, and outcomes."],
   ["PL", "Practical Learning", "Hands-on lab sessions, live software use, and structured daily practice."],
   ["AF", "Affordable Fees", "Career-relevant courses offered at accessible pricing with guided support."],
   ["LO", "Prime Location", "Campus access near Tahsildar Office Main Road, plus Bhaji Mandai in front of Hanuman Temple, Shirol."],
@@ -129,9 +128,9 @@ const faqs = [
 
 const siteSettingsDefaults = {
   instituteName: "Priyadarshini Computer & Typewriting Institute, Shirol",
-  shortName: "Priyadarshini Computer & Typewriting Institute",
+  shortName: "Priyadarshini Computer and Typewriting Institute",
   location:
-    "Near Tahsildar Office Main Road, Shirol, Kolhapur. 2nd address: Bhaji Mandai, front of Hanuman Temple, Shirol.",
+    "Main Branch: Near Tahsildar Office Main Road, Shirol, Kolhapur. Branch Campus: Bhaji Mandai, front of Hanuman Temple, Shirol.",
   whatsappNumber: "917558628660",
   contactPhone: "+91 755 862 8660",
   upiId: "",
@@ -163,6 +162,31 @@ const initialAdmissionForm = {
   typingOptions: [],
 };
 
+const courseFeeMap = {
+  "MS-CIT": 5000,
+  "Tally Prime": 6000,
+  "Typing - English": 6800,
+  "Typing - Marathi": 6800,
+};
+
+function getAdmissionAmount(courses) {
+  return (courses || []).reduce((sum, course) => sum + (courseFeeMap[course] || 0), 0);
+}
+
+function deriveAdmissionCoursesFromCalculator(calcSelections, calcTypingOption) {
+  const courses = [];
+  if (calcSelections.mscit) {
+    courses.push("MS-CIT");
+  }
+  if (calcSelections.tally) {
+    courses.push("Tally Prime");
+  }
+  if (calcSelections.typing) {
+    courses.push(calcTypingOption.startsWith("Marathi") ? "Typing - Marathi" : "Typing - English");
+  }
+  return courses;
+}
+
 function App() {
   const admissionRef = useRef(null);
   const adminMode = typeof window !== "undefined" && window.location.search.includes("admin=1");
@@ -173,6 +197,7 @@ function App() {
   const [calcSelections, setCalcSelections] = useState({});
   const [calcTypingOption, setCalcTypingOption] = useState("");
   const [admissionForm, setAdmissionForm] = useState(initialAdmissionForm);
+  const [submittedAdmission, setSubmittedAdmission] = useState(null);
   const [isSubmittingAdmission, setIsSubmittingAdmission] = useState(false);
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
@@ -323,11 +348,20 @@ function App() {
   const whatsappUrl = `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(
     `Hello, I want to know more about admissions at ${siteSettings.shortName}.`,
   )}`;
+  const readableShortName = siteSettings.shortName.replace(/\s*&\s*/g, " and ");
   const upiPaymentLink =
     calculatorTotal && siteSettings.upiId
       ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
           siteSettings.upiPayeeName || siteSettings.shortName,
         )}&am=${calculatorTotal}&cu=INR&tn=${encodeURIComponent(siteSettings.upiPaymentNote || "Admission fee payment")}`
+      : "";
+  const submittedPaymentLink =
+    submittedAdmission && siteSettings.upiId
+      ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
+          siteSettings.upiPayeeName || siteSettings.shortName,
+        )}&am=${submittedAdmission.amount}&cu=INR&tn=${encodeURIComponent(
+          `${siteSettings.upiPaymentNote || "Admission fee payment"} - ${submittedAdmission.studentCode}`,
+        )}`
       : "";
 
   const showToast = (message) => setToast(message);
@@ -376,6 +410,28 @@ function App() {
   const scrollToForm = (course) => {
     admissionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     setAdmissionForm((current) => ({ ...current, courses: [course] }));
+  };
+
+  const continueToAdmissionFromCalculator = () => {
+    const selectedCourses = deriveAdmissionCoursesFromCalculator(calcSelections, calcTypingOption);
+
+    if (selectedCourses.length === 0) {
+      showToast("Select at least one course first.");
+      return;
+    }
+
+    if (calcSelections.typing && !calcTypingOption) {
+      showToast("Select the typing language and speed first.");
+      return;
+    }
+
+    admissionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setAdmissionForm((current) => ({
+      ...current,
+      courses: selectedCourses,
+      typingOptions: calcSelections.typing && calcTypingOption ? [calcTypingOption] : current.typingOptions,
+    }));
+    showToast("Course selection moved to the admission form. Submit your details first, then complete payment.");
   };
 
   const toggleCalcCourse = (id, fee) => {
@@ -443,6 +499,19 @@ function App() {
         throw new Error(payload.error || "Failed to submit admission enquiry.");
       }
 
+      const selectedCourses = [...admissionForm.courses];
+      const selectedTypingOptions = [...admissionForm.typingOptions];
+      const amount = getAdmissionAmount(selectedCourses);
+      setSubmittedAdmission({
+        studentCode: payload.studentCode,
+        studentName: payload.studentName,
+        selectedCourses: payload.selectedCourses,
+        amount,
+        whatsappLink: `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(
+          `Hello, I have submitted my admission enquiry. Student ID: ${payload.studentCode}. I have completed the payment and I am sharing the screenshot for confirmation.`,
+        )}`,
+        typingOptions: selectedTypingOptions.join(", "),
+      });
       setAdmissionForm(initialAdmissionForm);
       await downloadReceipt(payload);
       showToast("Admission enquiry submitted successfully.");
@@ -796,7 +865,7 @@ function App() {
       <nav className={navScrolled ? "site-nav scrolled" : "site-nav"} id="navbar">
         <a className="nav-brand" href="#home">
           <span className="brand-dot">P</span>
-          <span>{siteSettings.shortName}</span>
+          <span>{readableShortName}</span>
         </a>
 
         <button className="hamburger" type="button" onClick={() => setNavOpen((current) => !current)}>
@@ -832,25 +901,50 @@ function App() {
                 2026 Admissions Open - Shirol
               </div>
               <h1 className="hero-title">
-                Shape Your
-                <br />
-                <span className="accent">Digital Future</span>
-                <br />
-                <span className="gold">With Confidence</span>
+                Priyadarshini Computer and Typewriting Institute
               </h1>
+              <div className="hero-experience">16+ years experience</div>
               <p className="hero-sub">
                 Priyadarshini Computer and Typewriting Institute, Shirol offers
                 career-oriented, certification-driven training in a clean,
                 supportive, and job-focused learning environment.
               </p>
               <div className="hero-highlights">
-                <span>16+ years experience</span>
                 <span>Shirol, Kolhapur</span>
                 <span>Admission guidance + practical training</span>
+                <span>Career-focused computer and typewriting training</span>
               </div>
               <div className="hero-addr">
-                <span className="pin">+</span>
-                <span>{siteSettings.location}</span>
+                <div className="hero-addr-row">
+                  <span className="hero-addr-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                  <span>
+                    <strong>Main Branch</strong>
+                    <br />
+                    Near Tahsildar Office Main Road, Shirol, Kolhapur
+                  </span>
+                </div>
+                <div className="hero-addr-row">
+                  <span className="hero-addr-icon alt" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                  <span>
+                    <strong>Branch Campus</strong>
+                    <br />
+                    Bhaji Mandai, front of Hanuman Temple, Shirol
+                  </span>
+                </div>
               </div>
               <div className="hero-btns">
                 <a className="btn-primary" href="#admission">
@@ -1056,26 +1150,9 @@ function App() {
                   <button className="calc-upi-btn secondary" type="button" onClick={copyUpiId}>
                     Copy UPI ID
                   </button>
-                  <a
-                    className={upiPaymentLink ? "calc-upi-btn" : "calc-upi-btn disabled"}
-                    href={
-                      upiPaymentLink ||
-                      "#fee-calc"
-                    }
-                    onClick={(event) => {
-                      if (!calculatorTotal) {
-                        event.preventDefault();
-                        showToast("Please select at least one course first.");
-                        return;
-                      }
-                      if (!siteSettings.upiId) {
-                        event.preventDefault();
-                        showToast("UPI is not configured yet. Update it from admin settings.");
-                      }
-                    }}
-                  >
-                    Pay via UPI / QR
-                  </a>
+                  <button className="calc-upi-btn" onClick={continueToAdmissionFromCalculator} type="button">
+                    Continue to Admission Form
+                  </button>
                 </div>
               </div>
 
@@ -1105,7 +1182,7 @@ function App() {
                   <ul className="calc-payment-meta">
                     <li>Currency: INR only</li>
                     <li>Amount: Rs. {calculatorTotal.toLocaleString("en-IN")}</li>
-                    <li>Status: Share payment screenshot on WhatsApp after paying</li>
+                    <li>Step: Submit the admission form first so admin can identify the payment correctly</li>
                   </ul>
                 </div>
               </div>
@@ -1301,6 +1378,71 @@ function App() {
               {isSubmittingAdmission ? "Submitting..." : "Submit Admission Enquiry"}
             </button>
           </form>
+
+          {submittedAdmission ? (
+            <div className="payment-proof-card">
+              <div className="payment-proof-head">
+                <div>
+                  <span className="payment-proof-kicker">Payment Step</span>
+                  <h3>Admission submitted. Complete payment with your student code.</h3>
+                  <p>
+                    Admin already has your full details in the dashboard. Now pay using the student code below so the payment can be matched to your enquiry.
+                  </p>
+                </div>
+                <div className="payment-proof-code">{submittedAdmission.studentCode}</div>
+              </div>
+
+              <div className="payment-proof-grid">
+                <div className="payment-proof-summary">
+                  <div className="payment-proof-row">
+                    <span>Student Name</span>
+                    <strong>{submittedAdmission.studentName}</strong>
+                  </div>
+                  <div className="payment-proof-row">
+                    <span>Courses</span>
+                    <strong>{submittedAdmission.selectedCourses}</strong>
+                  </div>
+                  <div className="payment-proof-row">
+                    <span>Typing Option</span>
+                    <strong>{submittedAdmission.typingOptions || "Not applicable"}</strong>
+                  </div>
+                  <div className="payment-proof-row">
+                    <span>Amount</span>
+                    <strong>Rs. {submittedAdmission.amount.toLocaleString("en-IN")}</strong>
+                  </div>
+                  <div className="payment-proof-row">
+                    <span>UPI ID</span>
+                    <strong>{siteSettings.upiId || "Add UPI ID from admin settings"}</strong>
+                  </div>
+                </div>
+
+                <div className="payment-proof-actions">
+                  {siteSettings.upiQrImageUrl ? (
+                    <img className="payment-proof-qr" src={siteSettings.upiQrImageUrl} alt="UPI QR for submitted admission" />
+                  ) : (
+                    <div className="payment-proof-empty">QR image not added yet</div>
+                  )}
+                  <div className="payment-proof-buttons">
+                    <a
+                      className={submittedPaymentLink ? "calc-upi-btn" : "calc-upi-btn disabled"}
+                      href={submittedPaymentLink || "#admission"}
+                      onClick={(event) => {
+                        if (!submittedPaymentLink) {
+                          event.preventDefault();
+                          showToast("UPI is not configured yet. Update it from admin settings.");
+                        }
+                      }}
+                    >
+                      Pay Now with Student Code
+                    </a>
+                    <a className="calc-upi-btn secondary" href={submittedAdmission.whatsappLink} target="_blank" rel="noreferrer">
+                      Send Screenshot on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </section>
 
         <section id="contact" className="light-section">

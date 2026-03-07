@@ -2,9 +2,9 @@ import { json, supabaseFetch } from "./_lib/supabase.js";
 
 const defaults = {
   institute_name: "Priyadarshini Computer & Typewriting Institute, Shirol",
-  short_name: "Priyadarshini Computer & Typewriting Institute",
+  short_name: "Priyadarshini Computer and Typewriting Institute",
   location:
-    "Near Tahsildar Office Main Road, Shirol, Kolhapur. 2nd address: Bhaji Mandai, front of Hanuman Temple, Shirol.",
+    "Main Branch: Near Tahsildar Office Main Road, Shirol, Kolhapur. Branch Campus: Bhaji Mandai, front of Hanuman Temple, Shirol.",
   whatsapp_number: "917558628660",
   contact_phone: "+91 755 862 8660",
   upi_id: "",
