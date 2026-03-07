@@ -227,8 +227,8 @@ section {
   position: relative;
   z-index: 1;
   width: min(1120px, 100%);
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
-  gap: clamp(1.8rem, 4vw, 3rem);
+  grid-template-columns: minmax(0, 1fr) minmax(460px, 1fr);
+  gap: clamp(2rem, 4.4vw, 3.4rem);
   align-items: center;
 }
 
@@ -444,14 +444,17 @@ section {
 
 .hero-card {
   position: relative;
-  max-width: 420px;
+  width: min(500px, 100%);
+  max-width: 500px;
   margin-left: auto;
-  padding: 2rem 2rem 1.8rem;
+  padding: 2.1rem 2.15rem 1.95rem;
 }
 
 .hero-card-wrap {
+  display: grid;
+  gap: 1.35rem;
   align-self: start;
-  padding-top: 0.35rem;
+  padding-top: 0;
 }
 
 .hero-card-badge {
@@ -514,7 +517,7 @@ section {
 }
 
 .pill-name {
-  font-size: 0.96rem;
+  font-size: 1rem;
 }
 
 .pill-meta,
@@ -534,7 +537,7 @@ section {
 }
 
 .pill-price {
-  font-size: 0.98rem;
+  font-size: 1rem;
 }
 
 .light-section {
@@ -1476,20 +1479,26 @@ select:focus,
 .branch-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 1.15rem;
+  margin-top: 2rem;
+}
+
+.hero-branch-grid {
+  width: min(500px, 100%);
+  margin: 0.15rem 0 0 auto;
 }
 
 .branch-card {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  min-height: 200px;
-  padding: 1rem;
+  min-height: 182px;
+  padding: 1.15rem 1.1rem;
   border-radius: 20px;
   background: linear-gradient(135deg, rgba(26, 107, 107, 0.08), rgba(200, 149, 58, 0.08));
   border: 1px solid rgba(26, 107, 107, 0.16);
   color: var(--ink);
+  box-shadow: var(--shadow);
 }
 
 .branch-card-head {
@@ -1674,6 +1683,11 @@ select:focus,
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  min-height: 42px;
+  padding: 0.72rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .footer-links a:hover,
@@ -1712,8 +1726,22 @@ select:focus,
 }
 
 .footer-link-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
   color: var(--gold-light);
-  font-size: 0.65rem;
+  font-size: 0;
+  border-radius: 50%;
+  background: rgba(232, 184, 109, 0.16);
+  position: relative;
+}
+
+.footer-link-icon::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .map-link-icon.alt {
@@ -2282,6 +2310,10 @@ button:disabled {
 
   .calc-qr-card {
     width: 100%;
+  }
+
+  .branch-grid {
+    grid-template-columns: 1fr;
   }
 
   .footer-grid,

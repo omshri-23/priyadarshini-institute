@@ -928,38 +928,6 @@ function App() {
                 <span>Admission guidance + practical training</span>
                 <span>Career-focused computer and typewriting training</span>
               </div>
-              <div className="hero-addr">
-                <div className="hero-addr-row">
-                  <span className="hero-addr-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path
-                        d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </span>
-                  <span>
-                    <strong>Main Branch</strong>
-                    <br />
-                    Near Tahsildar Office Main Road, Shirol, Kolhapur
-                  </span>
-                </div>
-                <div className="hero-addr-row">
-                  <span className="hero-addr-icon alt" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path
-                        d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </span>
-                  <span>
-                    <strong>Branch Campus</strong>
-                    <br />
-                    Bhaji Mandai, front of Hanuman Temple, Shirol
-                  </span>
-                </div>
-              </div>
               <div className="hero-btns">
                 <a className="btn-primary" href="#admission">
                   Apply for Admission
@@ -990,6 +958,32 @@ function App() {
                     <div className="pill-price">Rs. {course.fee.toLocaleString("en-IN")}</div>
                   </button>
                 ))}
+              </div>
+              <div className="branch-grid hero-branch-grid">
+                <a className="branch-card map-link" href={branchOneMapsUrl} target="_blank" rel="noreferrer">
+                  <div className="branch-card-head">
+                    <span className="map-link-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <strong>Main Branch</strong>
+                  </div>
+                  <span>{branchOneAddress}</span>
+                  <small>Open in Google Maps</small>
+                </a>
+                <a className="branch-card map-link" href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
+                  <div className="branch-card-head">
+                    <span className="map-link-icon alt" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <strong>Branch Campus</strong>
+                  </div>
+                  <span>{branchTwoAddress}</span>
+                  <small>Open in Google Maps</small>
+                </a>
               </div>
             </div>
           </div>
@@ -1485,31 +1479,18 @@ function App() {
                 <ContactItem icon="location" title="Address" body={siteSettings.location} />
                 <ContactItem icon="phone" title="Phone" body={siteSettings.contactPhone} />
                 <ContactItem
-                  icon="mail"
-                  title="Email"
-                  body={siteSettings.contactEmail || "Add institute email from admin settings"}
-                />
-                <ContactItem
                   icon="clock"
                   title="Working Hours"
                   body="Monday to Saturday: 9:00 AM to 6:00 PM. Sunday closed."
                 />
                 <div className="contact-actions">
-                  <a className="contact-action-btn" href={branchOneMapsUrl} target="_blank" rel="noreferrer">
+                  <a className="contact-action-btn" href={mapsUrl} target="_blank" rel="noreferrer">
                     <span className="contact-action-icon" aria-hidden="true">
                       <svg viewBox="0 0 24 24">
                         <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
                       </svg>
                     </span>
-                    Branch 1
-                  </a>
-                  <a className="contact-action-btn secondary" href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
-                    <span className="contact-action-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24">
-                        <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
-                      </svg>
-                    </span>
-                    Branch 2
+                    Open in Google Maps
                   </a>
                   <a className="contact-action-btn secondary" href={whatsappUrl} target="_blank" rel="noreferrer">
                     <span className="contact-action-icon" aria-hidden="true">
@@ -1518,32 +1499,6 @@ function App() {
                       </svg>
                     </span>
                     WhatsApp
-                  </a>
-                </div>
-                <div className="branch-grid">
-                  <a className="branch-card map-link" href={branchOneMapsUrl} target="_blank" rel="noreferrer">
-                    <div className="branch-card-head">
-                      <span className="map-link-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
-                        </svg>
-                      </span>
-                      <strong>Branch 1</strong>
-                    </div>
-                    <span>{branchOneAddress}</span>
-                    <small>Tap for Google Maps navigation</small>
-                  </a>
-                  <a className="branch-card map-link" href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
-                    <div className="branch-card-head">
-                      <span className="map-link-icon alt" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
-                        </svg>
-                      </span>
-                      <strong>Branch 2</strong>
-                    </div>
-                    <span>{branchTwoAddress}</span>
-                    <small>Tap for Google Maps navigation</small>
                   </a>
                 </div>
               </div>
@@ -1609,13 +1564,21 @@ function App() {
             <strong>{siteSettings.instituteName}</strong>
             <p>{siteSettings.location}</p>
             <div className="footer-quick-actions">
-              <a href={mapsUrl} target="_blank" rel="noreferrer">
+              <a href={branchOneMapsUrl} target="_blank" rel="noreferrer">
                 <span className="footer-action-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24">
                     <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" fill="currentColor" />
                   </svg>
                 </span>
-                Get Directions
+                Branch 1
+              </a>
+              <a href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
+                <span className="footer-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
+                  </svg>
+                </span>
+                Branch 2
               </a>
               <a href={whatsappUrl} target="_blank" rel="noreferrer">
                 <span className="footer-action-icon" aria-hidden="true">
@@ -1623,7 +1586,7 @@ function App() {
                     <path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .17 5.33.17 11.89c0 2.1.55 4.15 1.59 5.96L0 24l6.31-1.65a11.8 11.8 0 0 0 5.72 1.46h.01c6.55 0 11.89-5.33 11.89-11.89c0-3.18-1.24-6.17-3.41-8.44Z" fill="currentColor" />
                   </svg>
                 </span>
-                WhatsApp Us
+                WhatsApp
               </a>
             </div>
           </div>
