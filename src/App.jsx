@@ -1657,8 +1657,14 @@ function App() {
           <div className="admin-container" onClick={(event) => event.stopPropagation()}>
             {!adminLoggedIn ? (
               <div className="admin-login-box">
+                <span className="admin-login-kicker">Private Access</span>
                 <h2>Admin Login</h2>
                 <p>Use your private admin credentials to access enquiries, messages, payment settings, and dashboard controls.</p>
+                <div className="admin-login-points" aria-hidden="true">
+                  <span>Enquiries</span>
+                  <span>Messages</span>
+                  <span>Settings</span>
+                </div>
                 <form onSubmit={adminLogin}>
                   <input
                     className="admin-input"
@@ -1792,7 +1798,10 @@ function App() {
                   {adminView === "settings" ? (
                   <div className="admin-settings-card">
                     <div className="admin-table-head">
-                      <h3>Site Settings</h3>
+                      <div>
+                        <h3>Site Settings</h3>
+                        <p className="admin-table-subtitle">Keep institute details, payment controls, and admin access settings organized in one place.</p>
+                      </div>
                     </div>
                     <div className="settings-shell">
                       <section className="settings-section-card">
