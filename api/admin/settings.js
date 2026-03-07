@@ -6,6 +6,7 @@ const allowedKeys = [
   "location",
   "whatsapp_number",
   "contact_phone",
+  "contact_email",
   "upi_id",
   "upi_payee_name",
   "upi_qr_image_url",

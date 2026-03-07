@@ -48,6 +48,7 @@ values
   ('location', 'Main Branch: Near Tahsildar Office Main Road, Shirol, Kolhapur. Branch Campus: Bhaji Mandai, front of Hanuman Temple, Shirol.'),
   ('whatsapp_number', '917558628660'),
   ('contact_phone', '+91 755 862 8660'),
+  ('contact_email', ''),
   ('upi_id', ''),
   ('upi_payee_name', 'Priyadarshini Institute'),
   ('upi_qr_image_url', ''),

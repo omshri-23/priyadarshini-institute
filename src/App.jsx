@@ -133,6 +133,7 @@ const siteSettingsDefaults = {
     "Main Branch: Near Tahsildar Office Main Road, Shirol, Kolhapur. Branch Campus: Bhaji Mandai, front of Hanuman Temple, Shirol.",
   whatsappNumber: "917558628660",
   contactPhone: "+91 755 862 8660",
+  contactEmail: "",
   upiId: "",
   upiPayeeName: "Priyadarshini Institute",
   upiQrImageUrl: "",
@@ -189,6 +190,7 @@ function deriveAdmissionCoursesFromCalculator(calcSelections, calcTypingOption) 
 
 function App() {
   const admissionRef = useRef(null);
+  const paymentRef = useRef(null);
   const adminMode = typeof window !== "undefined" && window.location.search.includes("admin=1");
   const [navOpen, setNavOpen] = useState(false);
   const [navScrolled, setNavScrolled] = useState(false);
@@ -281,6 +283,7 @@ function App() {
           location: payload.settings.location || siteSettingsDefaults.location,
           whatsappNumber: payload.settings.whatsapp_number || siteSettingsDefaults.whatsappNumber,
           contactPhone: payload.settings.contact_phone || siteSettingsDefaults.contactPhone,
+          contactEmail: payload.settings.contact_email || "",
           upiId: payload.settings.upi_id || "",
           upiPayeeName: payload.settings.upi_payee_name || siteSettingsDefaults.upiPayeeName,
           upiQrImageUrl: payload.settings.upi_qr_image_url || "",
@@ -349,6 +352,10 @@ function App() {
     `Hello, I want to know more about admissions at ${siteSettings.shortName}.`,
   )}`;
   const readableShortName = siteSettings.shortName.replace(/\s*&\s*/g, " and ");
+  const branchOneAddress = "Near Tahsildar Office Main Road, Shirol, Kolhapur";
+  const branchTwoAddress = "Bhaji Mandai, front of Hanuman Temple, Shirol";
+  const branchOneMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchOneAddress)}`;
+  const branchTwoMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchTwoAddress)}`;
   const upiPaymentLink =
     calculatorTotal && siteSettings.upiId
       ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
@@ -505,16 +512,20 @@ function App() {
       setSubmittedAdmission({
         studentCode: payload.studentCode,
         studentName: payload.studentName,
+        contactNumber: admissionForm.contact,
         selectedCourses: payload.selectedCourses,
         amount,
         whatsappLink: `https://wa.me/${siteSettings.whatsappNumber}?text=${encodeURIComponent(
-          `Hello, I have submitted my admission enquiry. Student ID: ${payload.studentCode}. I have completed the payment and I am sharing the screenshot for confirmation.`,
+          `Hello, I have submitted my admission enquiry. Student ID: ${payload.studentCode}. Name: ${payload.studentName}. Phone: ${admissionForm.contact}. I have completed the payment and I am sharing the screenshot for confirmation.`,
         )}`,
         typingOptions: selectedTypingOptions.join(", "),
       });
       setAdmissionForm(initialAdmissionForm);
       await downloadReceipt(payload);
       showToast("Admission enquiry submitted successfully.");
+      window.setTimeout(() => {
+        paymentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
     } catch (error) {
       showToast(error.message || "Something went wrong while submitting the form.");
     } finally {
@@ -566,6 +577,8 @@ function App() {
       contactPhone:
         payload.rows.find((row) => row.setting_key === "contact_phone")?.setting_value ||
         siteSettingsDefaults.contactPhone,
+      contactEmail:
+        payload.rows.find((row) => row.setting_key === "contact_email")?.setting_value || "",
       upiId: payload.rows.find((row) => row.setting_key === "upi_id")?.setting_value || "",
       upiPayeeName:
         payload.rows.find((row) => row.setting_key === "upi_payee_name")?.setting_value ||
@@ -746,6 +759,7 @@ function App() {
           location: settingsForm.location,
           whatsapp_number: settingsForm.whatsappNumber,
           contact_phone: settingsForm.contactPhone,
+          contact_email: settingsForm.contactEmail,
           upi_id: settingsForm.upiId,
           upi_payee_name: settingsForm.upiPayeeName,
           upi_qr_image_url: settingsForm.upiQrImageUrl,
@@ -1329,6 +1343,13 @@ function App() {
 
             <div className="form-section-title">Education and Course</div>
 
+            <div className="form-helper-card">
+              <strong>Simple flow</strong>
+              <span>
+                Fill this form first. As soon as it is submitted, your student code and payment section will open below automatically.
+              </span>
+            </div>
+
             <Field label="Highest Education *">
               <div className="check-group">
                 {["10th", "12th", "Graduation", "Post Graduation"].map((option) => (
@@ -1380,13 +1401,13 @@ function App() {
           </form>
 
           {submittedAdmission ? (
-            <div className="payment-proof-card">
+            <div className="payment-proof-card" ref={paymentRef}>
               <div className="payment-proof-head">
                 <div>
                   <span className="payment-proof-kicker">Payment Step</span>
-                  <h3>Admission submitted. Complete payment with your student code.</h3>
+                  <h3>Admission submitted. Complete payment now with your student code.</h3>
                   <p>
-                    Admin already has your full details in the dashboard. Now pay using the student code below so the payment can be matched to your enquiry.
+                    Your enquiry is already saved in admin with full student details. Pay using this student code so the institute can match the payment correctly.
                   </p>
                 </div>
                 <div className="payment-proof-code">{submittedAdmission.studentCode}</div>
@@ -1397,6 +1418,10 @@ function App() {
                   <div className="payment-proof-row">
                     <span>Student Name</span>
                     <strong>{submittedAdmission.studentName}</strong>
+                  </div>
+                  <div className="payment-proof-row">
+                    <span>Phone Number</span>
+                    <strong>{submittedAdmission.contactNumber}</strong>
                   </div>
                   <div className="payment-proof-row">
                     <span>Courses</span>
@@ -1413,6 +1438,12 @@ function App() {
                   <div className="payment-proof-row">
                     <span>UPI ID</span>
                     <strong>{siteSettings.upiId || "Add UPI ID from admin settings"}</strong>
+                  </div>
+                  <div className="payment-proof-row payment-proof-reference">
+                    <span>Reference for Admin</span>
+                    <strong>
+                      {submittedAdmission.studentCode} / {submittedAdmission.contactNumber}
+                    </strong>
                   </div>
                 </div>
 
@@ -1451,46 +1482,116 @@ function App() {
             <div className="contact-grid">
               <div className="contact-info">
                 <h3>Institute Details</h3>
-                <ContactItem title="Address" body={`${siteSettings.location}, Karnataka`} />
-                <ContactItem title="Phone" body={siteSettings.contactPhone} />
-                <ContactItem title="Working Hours" body="Monday to Saturday: 9:00 AM to 6:00 PM. Sunday closed." />
+                <ContactItem icon="location" title="Address" body={siteSettings.location} />
+                <ContactItem icon="phone" title="Phone" body={siteSettings.contactPhone} />
+                <ContactItem
+                  icon="mail"
+                  title="Email"
+                  body={siteSettings.contactEmail || "Add institute email from admin settings"}
+                />
+                <ContactItem
+                  icon="clock"
+                  title="Working Hours"
+                  body="Monday to Saturday: 9:00 AM to 6:00 PM. Sunday closed."
+                />
                 <div className="contact-actions">
-                  <a className="contact-action-btn" href={mapsUrl} target="_blank" rel="noreferrer">
-                    Open in Google Maps
+                  <a className="contact-action-btn" href={branchOneMapsUrl} target="_blank" rel="noreferrer">
+                    <span className="contact-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    Branch 1
+                  </a>
+                  <a className="contact-action-btn secondary" href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
+                    <span className="contact-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    Branch 2
                   </a>
                   <a className="contact-action-btn secondary" href={whatsappUrl} target="_blank" rel="noreferrer">
-                    Chat on WhatsApp
+                    <span className="contact-action-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .17 5.33.17 11.89c0 2.1.55 4.15 1.59 5.96L0 24l6.31-1.65a11.8 11.8 0 0 0 5.72 1.46h.01c6.55 0 11.89-5.33 11.89-11.89c0-3.18-1.24-6.17-3.41-8.44Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    WhatsApp
                   </a>
                 </div>
-                <a className="map-placeholder map-link" href={mapsUrl} target="_blank" rel="noreferrer">
-                  <span>{siteSettings.location}</span>
-                  <small>Tap to open direct Google Maps navigation</small>
-                </a>
+                <div className="branch-grid">
+                  <a className="branch-card map-link" href={branchOneMapsUrl} target="_blank" rel="noreferrer">
+                    <div className="branch-card-head">
+                      <span className="map-link-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
+                        </svg>
+                      </span>
+                      <strong>Branch 1</strong>
+                    </div>
+                    <span>{branchOneAddress}</span>
+                    <small>Tap for Google Maps navigation</small>
+                  </a>
+                  <a className="branch-card map-link" href={branchTwoMapsUrl} target="_blank" rel="noreferrer">
+                    <div className="branch-card-head">
+                      <span className="map-link-icon alt" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                          <path d="M4 20h16v-2H4v2Zm1-4h14l-1.1-6.59A2 2 0 0 0 15.93 8H8.07a2 2 0 0 0-1.97 1.41L5 16Zm4-9h6V4H9v3Z" fill="currentColor" />
+                        </svg>
+                      </span>
+                      <strong>Branch 2</strong>
+                    </div>
+                    <span>{branchTwoAddress}</span>
+                    <small>Tap for Google Maps navigation</small>
+                  </a>
+                </div>
               </div>
 
               <form className="contact-form-card" onSubmit={submitContact}>
                 <h4>Send Us a Message</h4>
                 <Field label="Your Name">
-                  <input
-                    required
-                    value={contactForm.name}
-                    onChange={(event) => setContactForm((current) => ({ ...current, name: event.target.value }))}
-                  />
+                  <div className="input-shell">
+                    <span className="input-shell-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M12 12a4 4 0 1 0 0-8a4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <input
+                      required
+                      value={contactForm.name}
+                      onChange={(event) => setContactForm((current) => ({ ...current, name: event.target.value }))}
+                    />
+                  </div>
                 </Field>
                 <Field label="Phone Number">
-                  <input
-                    required
-                    value={contactForm.phone}
-                    onChange={(event) => setContactForm((current) => ({ ...current, phone: event.target.value }))}
-                  />
+                  <div className="input-shell">
+                    <span className="input-shell-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.56 3.57.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.19 2.45.56 3.57a1 1 0 0 1-.24 1.02l-2.2 2.2Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <input
+                      required
+                      value={contactForm.phone}
+                      onChange={(event) => setContactForm((current) => ({ ...current, phone: event.target.value }))}
+                    />
+                  </div>
                 </Field>
                 <Field label="Your Message">
-                  <textarea
-                    required
-                    rows="5"
-                    value={contactForm.message}
-                    onChange={(event) => setContactForm((current) => ({ ...current, message: event.target.value }))}
-                  />
+                  <div className="input-shell textarea-shell">
+                    <span className="input-shell-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path d="M4 4h16v12H7.17L4 19.17V4Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <textarea
+                      required
+                      rows="5"
+                      value={contactForm.message}
+                      onChange={(event) => setContactForm((current) => ({ ...current, message: event.target.value }))}
+                    />
+                  </div>
                 </Field>
                 <button className="submit-btn compact" type="submit">
                   Send Message
@@ -1504,13 +1605,24 @@ function App() {
       <footer className="site-footer">
         <div className="footer-grid">
           <div className="footer-brand">
+            <span className="footer-heading">Institute</span>
             <strong>{siteSettings.instituteName}</strong>
             <p>{siteSettings.location}</p>
             <div className="footer-quick-actions">
               <a href={mapsUrl} target="_blank" rel="noreferrer">
+                <span className="footer-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" fill="currentColor" />
+                  </svg>
+                </span>
                 Get Directions
               </a>
               <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                <span className="footer-action-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .17 5.33.17 11.89c0 2.1.55 4.15 1.59 5.96L0 24l6.31-1.65a11.8 11.8 0 0 0 5.72 1.46h.01c6.55 0 11.89-5.33 11.89-11.89c0-3.18-1.24-6.17-3.41-8.44Z" fill="currentColor" />
+                  </svg>
+                </span>
                 WhatsApp Us
               </a>
             </div>
@@ -1529,11 +1641,16 @@ function App() {
 
           <div className="footer-contact">
             <span className="footer-heading">Contact</span>
-            <a href={`tel:${siteSettings.contactPhone.replace(/\s+/g, "")}`}>{siteSettings.contactPhone}</a>
+            <a href={`tel:${siteSettings.contactPhone.replace(/\s+/g, "")}`}>
+              <span className="footer-link-icon" aria-hidden="true">●</span>
+              {siteSettings.contactPhone}
+            </a>
             <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              <span className="footer-link-icon" aria-hidden="true">●</span>
               WhatsApp Chat
             </a>
             <a href={mapsUrl} target="_blank" rel="noreferrer">
+              <span className="footer-link-icon" aria-hidden="true">●</span>
               Google Maps
             </a>
           </div>
@@ -1754,20 +1871,31 @@ function App() {
                               }
                             />
                           </Field>
-                          <Field label="Contact Phone">
-                            <input
-                              value={settingsForm.contactPhone}
+                      <Field label="Contact Phone">
+                        <input
+                          value={settingsForm.contactPhone}
                               onChange={(event) =>
                                 setSettingsForm((current) => ({
                                   ...current,
                                   contactPhone: event.target.value,
                                 }))
-                              }
-                            />
-                          </Field>
-                          <Field label="WhatsApp Number">
-                            <input
-                              value={settingsForm.whatsappNumber}
+                          }
+                        />
+                      </Field>
+                      <Field label="Contact Email">
+                        <input
+                          value={settingsForm.contactEmail}
+                          onChange={(event) =>
+                            setSettingsForm((current) => ({
+                              ...current,
+                              contactEmail: event.target.value,
+                            }))
+                          }
+                        />
+                      </Field>
+                      <Field label="WhatsApp Number">
+                        <input
+                          value={settingsForm.whatsappNumber}
                               onChange={(event) =>
                                 setSettingsForm((current) => ({
                                   ...current,
@@ -2157,10 +2285,33 @@ function Field({ children, label }) {
   );
 }
 
-function ContactItem({ title, body }) {
+function ContactItem({ icon, title, body }) {
+  const icons = {
+    location: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Zm0-8.5a3.5 3.5 0 1 1 0-7a3.5 3.5 0 0 1 0 7Z" fill="currentColor" />
+      </svg>
+    ),
+    phone: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.56 3.57.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.19 2.45.56 3.57a1 1 0 0 1-.24 1.02l-2.2 2.2Z" fill="currentColor" />
+      </svg>
+    ),
+    mail: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18v12H3V6Zm9 5 9-5H3l9 5Zm-9 7h18V8.18l-8.48 4.71a1 1 0 0 1-.97 0L3 8.18V18Z" fill="currentColor" />
+      </svg>
+    ),
+    clock: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 11h4v-2h-3V7h-2v6Z" fill="currentColor" />
+      </svg>
+    ),
+  };
+
   return (
     <div className="contact-item" data-reveal="">
-      <div className="contact-icon">{title.charAt(0)}</div>
+      <div className="contact-icon">{icons[icon] || title.charAt(0)}</div>
       <div>
         <strong>{title}</strong>
         <p>{body}</p>
