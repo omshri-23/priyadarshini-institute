@@ -136,7 +136,7 @@ const siteSettingsDefaults = {
   contactEmail: "",
   upiId: "9923261892@ybl",
   upiPayeeName: "Priyadarshini Institute",
-  upiQrImageUrl: "/qr.PNG",
+  upiQrImageUrl: "/qr.png",
   upiPaymentNote: "Admission fee payment",
 };
 
