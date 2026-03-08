@@ -1475,7 +1475,13 @@ function App() {
             <span className="footer-heading">Contact</span>
             <a href={`tel:${primaryContactPhone.replace(/\s+/g, "")}`}>
               <span className="footer-link-icon" aria-hidden="true">●</span>
-              {siteSettings.contactPhone}
+              <span className="footer-contact-lines">
+                {contactPhoneNumbers.map((line) => (
+                  <span className="footer-contact-line" key={line}>
+                    {line}
+                  </span>
+                ))}
+              </span>
             </a>
             <a href={whatsappUrl} target="_blank" rel="noreferrer">
               <span className="footer-link-icon" aria-hidden="true">●</span>
