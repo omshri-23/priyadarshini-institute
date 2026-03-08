@@ -132,7 +132,7 @@ const siteSettingsDefaults = {
   location:
     "Main Branch: Near Tahsildar Office Main Road, Shirol, Kolhapur. Branch Campus: Bhaji Mandai, front of Hanuman Temple, Shirol.",
   whatsappNumber: "917558628660",
-  contactPhone: "+91 755 862 8660",
+  contactPhone: "9923261892, 7447281002, 7558628660",
   contactEmail: "",
   upiId: "",
   upiPayeeName: "Priyadarshini Institute",
@@ -324,10 +324,15 @@ function App() {
     `Hello, I want to know more about admissions at ${siteSettings.shortName}.`,
   )}`;
   const readableShortName = siteSettings.shortName.replace(/\s*&\s*/g, " and ");
+  const contactPhoneNumbers = siteSettings.contactPhone
+    .split(/[,\n]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const primaryContactPhone = contactPhoneNumbers[0] || siteSettings.contactPhone;
   const branchOneAddress = "Near Tahsildar Office Main Road, Shirol, Kolhapur";
   const branchTwoAddress = "Bhaji Mandai, front of Hanuman Temple, Shirol";
-  const branchOneMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchOneAddress)}`;
-  const branchTwoMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branchTwoAddress)}`;
+  const branchOneMapsUrl = "https://maps.app.goo.gl/ocgFSuUS5Qa7nf2M7?g_st=aw";
+  const branchTwoMapsUrl = "https://maps.app.goo.gl/Y4PVjUTtum3uLKfE8?g_st=aw";
   const submittedPaymentLink =
     submittedAdmission && siteSettings.upiId
       ? `upi://pay?pa=${encodeURIComponent(siteSettings.upiId)}&pn=${encodeURIComponent(
@@ -348,7 +353,7 @@ function App() {
     pdf.setFontSize(12);
     pdf.setFont("helvetica", "normal");
     pdf.text(siteSettings.location, 20, 32);
-    pdf.text(`Contact: ${siteSettings.contactPhone}`, 20, 39);
+    pdf.text(`Contact: ${contactPhoneNumbers.join(", ") || siteSettings.contactPhone}`, 20, 39);
 
     pdf.setDrawColor(26, 107, 107);
     pdf.line(20, 45, 190, 45);
@@ -1332,7 +1337,7 @@ function App() {
               <div className="contact-info">
                 <h3>Institute Details</h3>
                 <ContactItem icon="location" title="Address" body={siteSettings.location} />
-                <ContactItem icon="phone" title="Phone" body={siteSettings.contactPhone} />
+                <ContactItem icon="phone" title="Phone" body={contactPhoneNumbers} />
                 <ContactItem
                   icon="clock"
                   title="Working Hours"
@@ -1459,7 +1464,7 @@ function App() {
 
           <div className="footer-contact">
             <span className="footer-heading">Contact</span>
-            <a href={`tel:${siteSettings.contactPhone.replace(/\s+/g, "")}`}>
+            <a href={`tel:${primaryContactPhone.replace(/\s+/g, "")}`}>
               <span className="footer-link-icon" aria-hidden="true">●</span>
               {siteSettings.contactPhone}
             </a>
@@ -2113,6 +2118,12 @@ function Field({ children, label }) {
 }
 
 function ContactItem({ icon, title, body }) {
+  const bodyLines = Array.isArray(body)
+    ? body
+    : String(body)
+        .split(/\n+/)
+        .map((value) => value.trim())
+        .filter(Boolean);
   const icons = {
     location: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -2141,7 +2152,14 @@ function ContactItem({ icon, title, body }) {
       <div className="contact-icon">{icons[icon] || title.charAt(0)}</div>
       <div>
         <strong>{title}</strong>
-        <p>{body}</p>
+        <p>
+          {bodyLines.map((line, index) => (
+            <span className="contact-line" key={`${title}-${line}`}>
+              {line}
+              {index < bodyLines.length - 1 ? <br /> : null}
+            </span>
+          ))}
+        </p>
       </div>
     </div>
   );
