@@ -1901,30 +1901,32 @@ function App() {
                               <td>
                                 <span className={`badge ${row.payment_status}`}>{row.payment_status}</span>
                               </td>
-                              <td>
-                                <button
-                                  className="action-btn"
-                                  onClick={() => setSelectedRegistration(row)}
-                                  type="button"
-                                >
-                                  View
-                                </button>
-                                <button
-                                  className="action-btn"
-                                  onClick={() =>
-                                    updatePaymentStatus(row.id, nextPaymentStatus(row.payment_status))
-                                  }
-                                  type="button"
-                                >
-                                  Toggle
-                                </button>
-                                <button
-                                  className="action-btn del"
-                                  onClick={() => deleteRegistration(row.id)}
-                                  type="button"
-                                >
-                                  Delete
-                                </button>
+                              <td className="actions-cell">
+                                <div className="admin-actions">
+                                  <button
+                                    className="action-btn"
+                                    onClick={() => setSelectedRegistration(row)}
+                                    type="button"
+                                  >
+                                    View
+                                  </button>
+                                  <button
+                                    className="action-btn"
+                                    onClick={() =>
+                                      updatePaymentStatus(row.id, nextPaymentStatus(row.payment_status))
+                                    }
+                                    type="button"
+                                  >
+                                    Toggle
+                                  </button>
+                                  <button
+                                    className="action-btn del"
+                                    onClick={() => deleteRegistration(row.id)}
+                                    type="button"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -2007,20 +2009,22 @@ function App() {
                               <td>{row.phone_number}</td>
                               <td><span className={`badge ${row.status === "done" ? "paid" : "pending"}`}>{row.status}</span></td>
                               <td>{new Date(row.created_at).toLocaleDateString("en-IN")}</td>
-                              <td>
-                                <button className="action-btn" onClick={() => setSelectedMessage(row)} type="button">
-                                  View
-                                </button>
-                                <button
-                                  className="action-btn"
-                                  onClick={() => updateMessageStatus(row.id, row.status === "done" ? "new" : "done")}
-                                  type="button"
-                                >
-                                  Toggle
-                                </button>
-                                <button className="action-btn del" onClick={() => deleteMessage(row.id)} type="button">
-                                  Delete
-                                </button>
+                              <td className="actions-cell">
+                                <div className="admin-actions">
+                                  <button className="action-btn" onClick={() => setSelectedMessage(row)} type="button">
+                                    View
+                                  </button>
+                                  <button
+                                    className="action-btn"
+                                    onClick={() => updateMessageStatus(row.id, row.status === "done" ? "new" : "done")}
+                                    type="button"
+                                  >
+                                    Toggle
+                                  </button>
+                                  <button className="action-btn del" onClick={() => deleteMessage(row.id)} type="button">
+                                    Delete
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}

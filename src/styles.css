@@ -2299,10 +2299,27 @@ th {
 }
 
 .action-btn {
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.55rem 0.9rem;
   background: var(--teal);
   color: #fff;
-  margin-right: 6px;
+  margin-right: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  min-width: 210px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .action-btn.secondary {
@@ -2481,6 +2498,21 @@ button:disabled {
 
   .fee-flow-note {
     grid-template-columns: 1fr;
+  }
+
+  .actions-cell {
+    min-width: 190px;
+  }
+
+  .admin-actions {
+    min-width: 170px;
+  }
+
+  .admin-actions .action-btn {
+    flex: 1 1 calc(50% - 0.45rem);
+    justify-content: center;
+    text-align: center;
+    padding-inline: 0.7rem;
   }
 
   .branch-grid {
