@@ -174,6 +174,18 @@ function getAdmissionAmount(courses) {
   return (courses || []).reduce((sum, course) => sum + (courseFeeMap[course] || 0), 0);
 }
 
+function parseContactPhoneNumbers(value) {
+  const source = String(value || "");
+  const matches = source.match(/(?:\+?91[\s-]*)?\d{10}/g);
+  const numbers = (matches && matches.length ? matches : source.split(/[,\n]+/))
+    .map((entry) => entry.replace(/[^\d]/g, ""))
+    .filter(Boolean)
+    .map((digits) => (digits.length > 10 ? digits.slice(-10) : digits))
+    .filter((digits) => digits.length === 10);
+
+  return Array.from(new Set(numbers)).map((digits) => `+91 ${digits}`);
+}
+
 function App() {
   const admissionRef = useRef(null);
   const paymentRef = useRef(null);
@@ -324,10 +336,7 @@ function App() {
     `Hello, I want to know more about admissions at ${siteSettings.shortName}.`,
   )}`;
   const readableShortName = siteSettings.shortName.replace(/\s*&\s*/g, " and ");
-  const contactPhoneNumbers = siteSettings.contactPhone
-    .split(/[,\n]+/)
-    .map((value) => value.trim())
-    .filter(Boolean);
+  const contactPhoneNumbers = parseContactPhoneNumbers(siteSettings.contactPhone);
   const primaryContactPhone = contactPhoneNumbers[0] || siteSettings.contactPhone;
   const branchOneAddress = "Near Tahsildar Office Main Road, Shirol, Kolhapur";
   const branchTwoAddress = "Bhaji Mandai, front of Hanuman Temple, Shirol";
