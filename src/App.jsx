@@ -134,9 +134,9 @@ const siteSettingsDefaults = {
   whatsappNumber: "917558628660",
   contactPhone: "9923261892, 7447281002, 7558628660",
   contactEmail: "",
-  upiId: "",
+  upiId: "9923261892@ybl",
   upiPayeeName: "Priyadarshini Institute",
-  upiQrImageUrl: "",
+  upiQrImageUrl: "/qr.PNG",
   upiPaymentNote: "Admission fee payment",
 };
 
@@ -280,9 +280,9 @@ function App() {
           whatsappNumber: payload.settings.whatsapp_number || siteSettingsDefaults.whatsappNumber,
           contactPhone: payload.settings.contact_phone || siteSettingsDefaults.contactPhone,
           contactEmail: payload.settings.contact_email || "",
-          upiId: payload.settings.upi_id || "",
+          upiId: payload.settings.upi_id || siteSettingsDefaults.upiId,
           upiPayeeName: payload.settings.upi_payee_name || siteSettingsDefaults.upiPayeeName,
-          upiQrImageUrl: payload.settings.upi_qr_image_url || "",
+          upiQrImageUrl: payload.settings.upi_qr_image_url || siteSettingsDefaults.upiQrImageUrl,
           upiPaymentNote: payload.settings.upi_payment_note || siteSettingsDefaults.upiPaymentNote,
         };
 
@@ -511,12 +511,12 @@ function App() {
         siteSettingsDefaults.contactPhone,
       contactEmail:
         payload.rows.find((row) => row.setting_key === "contact_email")?.setting_value || "",
-      upiId: payload.rows.find((row) => row.setting_key === "upi_id")?.setting_value || "",
+      upiId: payload.rows.find((row) => row.setting_key === "upi_id")?.setting_value || siteSettingsDefaults.upiId,
       upiPayeeName:
         payload.rows.find((row) => row.setting_key === "upi_payee_name")?.setting_value ||
         siteSettingsDefaults.upiPayeeName,
       upiQrImageUrl:
-        payload.rows.find((row) => row.setting_key === "upi_qr_image_url")?.setting_value || "",
+        payload.rows.find((row) => row.setting_key === "upi_qr_image_url")?.setting_value || siteSettingsDefaults.upiQrImageUrl,
       upiPaymentNote:
         payload.rows.find((row) => row.setting_key === "upi_payment_note")?.setting_value ||
         siteSettingsDefaults.upiPaymentNote,
