@@ -11,7 +11,7 @@ const courseCards = [
     durationLabel: "Months",
     badge: "Govt.",
     badgeLabel: "Certified",
-    fee: 5000,
+    fee: 4999,
   },
   {
     key: "Tally Prime",
@@ -61,7 +61,7 @@ const whyCards = [
 ];
 
 const calculatorCourses = [
-  { id: "mscit", label: "MS-CIT", meta: "3 Months - Govt. Certified", fee: 5000 },
+  { id: "mscit", label: "MS-CIT", meta: "3 Months - Govt. Certified", fee: 4999 },
   { id: "tally", label: "Tally Prime", meta: "6 Months - Accounting", fee: 6000 },
   { id: "typing", label: "Typewriting", meta: "English or Marathi", fee: 6499 },
 ];
@@ -98,7 +98,7 @@ const faqs = [
   ],
   [
     "How long is the MS-CIT course and what is the fee?",
-    "MS-CIT is a 3-month course with a fee of Rs. 5,000 covering computer basics, MS Office, internet, email, and digital literacy.",
+    "MS-CIT is a 3-month course with a fee of Rs. 4,999 covering computer basics, MS Office, internet, email, and digital literacy.",
   ],
   [
     "Is Tally Prime useful for government jobs?",
@@ -164,7 +164,7 @@ const initialAdmissionForm = {
 };
 
 const courseFeeMap = {
-  "MS-CIT": 5000,
+  "MS-CIT": 4999,
   "Tally Prime": 6000,
   "Typing - English": 6499,
   "Typing - Marathi": 6499,
