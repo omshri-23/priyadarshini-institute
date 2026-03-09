@@ -1390,7 +1390,10 @@ function App() {
                 <ContactItem
                   icon="clock"
                   title="Working Hours"
-                  body="Monday to Saturday: 9:00 AM to 6:00 PM. Sunday closed."
+                  body={[
+                    "Monday to Saturday: 9:00 AM to 6:00 PM",
+                    "Sunday closed",
+                  ]}
                 />
                 <div className="contact-actions">
                   <a className="contact-action-btn" href={mapsUrl} target="_blank" rel="noreferrer">
