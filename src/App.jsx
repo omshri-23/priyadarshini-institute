@@ -1378,7 +1378,14 @@ function App() {
             <div className="contact-grid">
               <div className="contact-info">
                 <h3>Institute Details</h3>
-                <ContactItem icon="location" title="Address" body={siteSettings.location} />
+                <ContactItem
+                  icon="location"
+                  title="Address"
+                  body={[
+                    "Near Tahsildar Office main road - Shirol, Kolhapur",
+                    "Bhaji mandai in front of Hanuman Temple, Shirol",
+                  ]}
+                />
                 <ContactItem icon="phone" title="Phone" body={contactPhoneNumbers} />
                 <ContactItem
                   icon="clock"
