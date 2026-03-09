@@ -35,7 +35,7 @@ const courseCards = [
     durationLabel: "wpm",
     badge: "Exam",
     badgeLabel: "Ready",
-    fee: 6800,
+    fee: 6499,
   },
   {
     key: "Typing - Marathi",
@@ -47,7 +47,7 @@ const courseCards = [
     durationLabel: "wpm",
     badge: "Marathi",
     badgeLabel: "Language",
-    fee: 6800,
+    fee: 6499,
   },
 ];
 
@@ -63,14 +63,14 @@ const whyCards = [
 const calculatorCourses = [
   { id: "mscit", label: "MS-CIT", meta: "3 Months - Govt. Certified", fee: 5000 },
   { id: "tally", label: "Tally Prime", meta: "6 Months - Accounting", fee: 6000 },
-  { id: "typing", label: "Typewriting", meta: "English or Marathi", fee: 6800 },
+  { id: "typing", label: "Typewriting", meta: "English or Marathi", fee: 6499 },
 ];
 
 const typingChoices = [
-  "English 30 wpm",
-  "English 40 wpm",
-  "Marathi 30 wpm",
-  "Marathi 40 wpm",
+  "English 30 wpm (Rs. 6,499)",
+  "English 40 wpm (Rs. 6,499)",
+  "Marathi 30 wpm (Rs. 6,499)",
+  "Marathi 40 wpm (Rs. 6,499)",
 ];
 
 const processSteps = [
@@ -166,8 +166,8 @@ const initialAdmissionForm = {
 const courseFeeMap = {
   "MS-CIT": 5000,
   "Tally Prime": 6000,
-  "Typing - English": 6800,
-  "Typing - Marathi": 6800,
+  "Typing - English": 6499,
+  "Typing - Marathi": 6499,
 };
 
 function getAdmissionAmount(courses) {
