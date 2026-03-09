@@ -166,9 +166,16 @@ const initialAdmissionForm = {
 const courseFeeMap = {
   "MS-CIT": 4999,
   "Tally Prime": 5999,
+  "Typing Course": 6499,
   "Typing - English": 6499,
   "Typing - Marathi": 6499,
 };
+
+const admissionCourseOptions = [
+  { key: "MS-CIT", title: "MS-CIT", fee: 4999 },
+  { key: "Tally Prime", title: "Tally Prime", fee: 5999 },
+  { key: "Typing Course", title: "Typing Course", fee: 6499 },
+];
 
 function getAdmissionAmount(courses) {
   return (courses || []).reduce((sum, course) => sum + (courseFeeMap[course] || 0), 0);
@@ -382,7 +389,10 @@ function App() {
 
   const scrollToForm = (course) => {
     admissionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    setAdmissionForm((current) => ({ ...current, courses: [course] }));
+    setAdmissionForm((current) => ({
+      ...current,
+      courses: [course.startsWith("Typing -") ? "Typing Course" : course],
+    }));
   };
 
   const onAdmissionChange = (field, value) => {
@@ -398,6 +408,23 @@ function App() {
         set.add(value);
       }
       return { ...current, [field]: Array.from(set) };
+    });
+  };
+
+  const toggleCourseSelection = (courseKey) => {
+    setAdmissionForm((current) => {
+      const nextCourses = new Set(current.courses);
+      if (nextCourses.has(courseKey)) {
+        nextCourses.delete(courseKey);
+      } else {
+        nextCourses.add(courseKey);
+      }
+
+      return {
+        ...current,
+        courses: Array.from(nextCourses),
+        typingOptions: nextCourses.has("Typing Course") ? current.typingOptions : [],
+      };
     });
   };
 
@@ -421,6 +448,11 @@ function App() {
 
     if (admissionForm.courses.length === 0) {
       showToast("Please select at least one course.");
+      return;
+    }
+
+    if (admissionForm.courses.includes("Typing Course") && admissionForm.typingOptions.length === 0) {
+      showToast("Please select at least one typing course option.");
       return;
     }
 
@@ -1230,11 +1262,11 @@ function App() {
 
             <Field label="Course Selection *">
               <div className="check-group">
-                {courseCards.map((course) => (
+                {admissionCourseOptions.map((course) => (
                   <label className="check-item" key={course.key}>
                     <input
                       checked={admissionForm.courses.includes(course.key)}
-                      onChange={() => toggleFormArrayValue("courses", course.key)}
+                      onChange={() => toggleCourseSelection(course.key)}
                       type="checkbox"
                     />
                     {course.title} (Rs. {course.fee.toLocaleString("en-IN")})
@@ -1243,11 +1275,12 @@ function App() {
               </div>
             </Field>
 
-            <Field label="Typing Options">
+            <Field label="Typing Course">
               <div className="check-group">
                 {typingChoices.map((option) => (
                   <label className="check-item" key={option}>
                     <input
+                      disabled={!admissionForm.courses.includes("Typing Course")}
                       checked={admissionForm.typingOptions.includes(option)}
                       onChange={() => toggleFormArrayValue("typingOptions", option)}
                       type="checkbox"
