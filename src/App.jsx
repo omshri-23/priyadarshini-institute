@@ -23,7 +23,7 @@ const courseCards = [
     durationLabel: "Months",
     badge: "Industry",
     badgeLabel: "Standard",
-    fee: 6000,
+    fee: 5999,
   },
   {
     key: "Typing - English",
@@ -62,7 +62,7 @@ const whyCards = [
 
 const calculatorCourses = [
   { id: "mscit", label: "MS-CIT", meta: "3 Months - Govt. Certified", fee: 4999 },
-  { id: "tally", label: "Tally Prime", meta: "6 Months - Accounting", fee: 6000 },
+  { id: "tally", label: "Tally Prime", meta: "6 Months - Accounting", fee: 5999 },
   { id: "typing", label: "Typewriting", meta: "English or Marathi", fee: 6499 },
 ];
 
@@ -165,7 +165,7 @@ const initialAdmissionForm = {
 
 const courseFeeMap = {
   "MS-CIT": 4999,
-  "Tally Prime": 6000,
+  "Tally Prime": 5999,
   "Typing - English": 6499,
   "Typing - Marathi": 6499,
 };
