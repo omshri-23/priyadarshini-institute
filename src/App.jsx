@@ -174,7 +174,7 @@ const courseFeeMap = {
 const admissionCourseOptions = [
   { key: "MS-CIT", title: "MS-CIT", fee: 4999 },
   { key: "Tally Prime", title: "Tally Prime", fee: 5999 },
-  { key: "Typing Course", title: "Typing Course", fee: 6499 },
+  { key: "Typing Course", title: "Typing Course", displayLabel: "Typing Course (Rs. 6,499 each)", fee: 6499 },
 ];
 
 function getAdmissionAmount(courses) {
@@ -1269,7 +1269,7 @@ function App() {
                       onChange={() => toggleCourseSelection(course.key)}
                       type="checkbox"
                     />
-                    {course.title} (Rs. {course.fee.toLocaleString("en-IN")})
+                    {course.displayLabel || `${course.title} (Rs. ${course.fee.toLocaleString("en-IN")})`}
                   </label>
                 ))}
               </div>
