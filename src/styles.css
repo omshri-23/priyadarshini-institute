@@ -1398,7 +1398,7 @@ select,
 
 .admin-search {
   padding-left: 44px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%231a6b6b' d='M10 2a8 8 0 1 0 4.9 14.32l4.39 4.39a1 1 0 0 0 1.42-1.42l-4.39-4.39A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12a6 6 0 0 1 0-12Z'/%3E%3C/svg%3E");
+  background-image: url("/favicon-32x32.png?v=20260310_2");
   background-repeat: no-repeat;
   background-position: 14px 50%;
   background-size: 18px 18px;
