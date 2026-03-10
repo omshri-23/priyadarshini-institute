@@ -1387,6 +1387,14 @@ select,
   color: var(--ink);
 }
 
+.admin-search {
+  padding-left: 44px;
+  background-image: url("/favicon-32x32.png");
+  background-repeat: no-repeat;
+  background-position: 14px 50%;
+  background-size: 18px 18px;
+}
+
 input:focus,
 textarea:focus,
 select:focus,
