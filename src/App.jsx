@@ -842,7 +842,7 @@ function App() {
     <div className="site-shell">
       <nav className={navScrolled ? "site-nav scrolled" : "site-nav"} id="navbar">
         <a className="nav-brand" href="#home">
-          <img className="brand-logo" src="/android-chrome-192x192.png?v=20260310_2" alt="Priyadarshini logo" />
+          <img className="brand-logo" src="/android-chrome-192x192.png?v=20260310_3" alt="Priyadarshini logo" />
           <span>{readableShortName}</span>
         </a>
 
